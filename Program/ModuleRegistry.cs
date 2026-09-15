@@ -3,7 +3,7 @@ using HCLI.Program.Base;
 
 namespace HCLI.Program
 {
-    public class ModuleManager
+    public class ModuleRegistry
     {
         // -- Modules -- //
 
@@ -15,7 +15,7 @@ namespace HCLI.Program
         public Dictionary<string, ModuleData> MODULE_DATABASE;
 
 
-        public ModuleManager()
+        public ModuleRegistry()
         {
 
             // -- base object initialization -- //    <- (1) Ezeket csak akkor inicializálnánk, ha a felhasználó kiválasztja (mondjuk külső forrásból) a modult betöltésre

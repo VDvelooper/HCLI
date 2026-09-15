@@ -6,7 +6,7 @@
         public static ConfigManager ConfigManager { get; private set; }
         public static SessionData SessionData { get; private set; }
 
-        public static ModuleManager ModuleManager { get; private set; }
+        public static ModuleRegistry ModuleRegistry { get; private set; }
 
 
 
@@ -60,7 +60,7 @@
             ConfigManager = new ConfigManager();
             SessionData = new SessionData();
 
-            ModuleManager = new ModuleManager();
+            ModuleRegistry = new ModuleRegistry();
 
 
             SessionData.Running = true;

@@ -11,8 +11,8 @@ namespace HCLI.Modules
         public string USERNAME = "";
 
         public string MAIN_DIRECTORY_PATH = $@"{MODULE_DATA_DIR_PATH}\Secrecy";
-        public string CONFIG_ABSOLUTE_PATH = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Secrecy\config.hclidata";
-        public string USERS_ABSOLUTE_PATH = @$"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Secrecy\Data\users.hclidata";
+        public string CONFIG_ABSOLUTE_PATH = @$"{MODULE_DATA_DIR_PATH}\Secrecy\config.hclidata";
+        public string USERS_ABSOLUTE_PATH = @$"{MODULE_DATA_DIR_PATH}\Secrecy\Data\users.hclidata";
 
         public SecrecyModule(string Name, string ModuleCommand, bool separateMode) : base(
             Name,
@@ -127,7 +127,7 @@ namespace HCLI.Modules
             {
                 userData = new UserData();
 
-                CreateUser(userData);
+                CreateUser(ref userData);
                 
                 string fileContent = JsonSerializer.Serialize<UserData>(userData);
 
@@ -156,12 +156,12 @@ namespace HCLI.Modules
                     }
                     else 
                     {
-                        CreateUser(userData);
+                        CreateUser(ref userData);
                     }
                 }
                 else 
                 {
-                    CreateUser(userData);
+                    CreateUser(ref userData);
                 }
             }
         }
@@ -191,7 +191,7 @@ namespace HCLI.Modules
                 userInput = Console.ReadLine();
             }
 
-            if (userInput == "new") CreateUser(userData);
+            if (userInput == "new") CreateUser(ref userData);
             else 
             {
                 string username = userInput;
@@ -214,7 +214,7 @@ namespace HCLI.Modules
             }
         }
 
-        private void CreateUser(UserData userData)
+        private void CreateUser(ref UserData userData)
         {
             Console.WriteLine("Set your username:");
             Console.Write("Secrecy > ");

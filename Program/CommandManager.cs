@@ -44,9 +44,9 @@ namespace HCLI.Program
             {
                 Commands[userInput.Command](userInput.Args);
             }
-            else if (Runtime.ModuleManager.MODULE_DATABASE.ContainsKey(userInput.Command))
+            else if (Runtime.ModuleRegistry.MODULE_DATABASE.ContainsKey(userInput.Command))
             {
-                Runtime.ModuleManager.TryExecutingCommandFromModule(userInput);
+                Runtime.ModuleRegistry.TryExecutingCommandFromModule(userInput);
             }
             else
             {
@@ -59,8 +59,6 @@ namespace HCLI.Program
         {
             return args.Count == expectedArgsCount - 1;
         }
-
-
 
 
         // The methods of the base CLI commands defined from here.
@@ -83,11 +81,11 @@ namespace HCLI.Program
         }
         public static void Help(List<string> args)
         {
-            Console.WriteLine($"\necho -> Outputs the text followed by the 'echo' keyword. [1th arg: the text itself]\n" +
+            Console.WriteLine($"\nexit -> Exits HCLI.\n" +
+                $"echo -> Outputs the text followed by the 'echo' keyword. [1th arg: the text itself]\n" +
                 $"clear -> Clears the console. [0 arguments]\n" +
                 $"help -> Writes out all the base commands. [0 arguments]\n" +
-                $"lam -> Writes out all the avalible modules. [0 arguments]\n" +
-                $"setup -> Creating the password manager's base. [0 arguments]\n");
+                $"lam -> Writes out all the avalible modules. [0 arguments]\n");
         }
         public void Clear(List<string> args)
         {
@@ -96,7 +94,7 @@ namespace HCLI.Program
         public void ListAvalibleModules(List<string> args)
         {
             Console.WriteLine();
-            foreach (ModuleData module in Runtime.ModuleManager.AVALIBLE_MODULES)
+            foreach (ModuleData module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
             {
                 Console.WriteLine(module.Name);
             }
