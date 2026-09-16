@@ -1,10 +1,10 @@
-﻿namespace HCLI.Program.Base
+﻿namespace HCLI.Program.ModuleCore.Shared
 {
     public class ModuleBase
     {
         public string ModuleName { get; protected set; }
         public string ModuleCommand { get; protected set; }
-        public Dictionary<string, Action<UserModuleModeInput>> SubCommands { get; set; }
+        public Dictionary<string, Action<ModuleModeUserInput>> SubCommands { get; set; }
 
         public static string MODULE_DATA_DIR_PATH = @$"{Runtime.ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
 
@@ -43,7 +43,7 @@
         }
 
 
-        public void SubCommandParser(UserModuleModeInput userInput)
+        public void SubCommandParser(ModuleModeUserInput userInput)
         {
             string subCommand = "";
 
@@ -58,25 +58,25 @@
             }
         }
 
-        private void EnterModuleCommand(UserModuleModeInput userInput)
+        private void EnterModuleCommand(ModuleModeUserInput userInput)
         {
             if (!_separateMode) return;
             if (_separateModeRunning) return;
 
             _separateModeRunning = true;
         }
-        private void ExitModuleCommand(UserModuleModeInput userInput)
+        private void ExitModuleCommand(ModuleModeUserInput userInput)
         {
             if (!_separateMode) return;
             if (!_separateModeRunning || userInput.Args.Count > 0) return;
 
             _separateModeRunning = false;
         }
-        private void HelpModuleCommand(UserModuleModeInput userInput)
+        private void HelpModuleCommand(ModuleModeUserInput userInput)
         {
             List<string> commandList = new List<string>();
 
-            foreach (KeyValuePair<string, Action<UserModuleModeInput>> pair in SubCommands)
+            foreach (KeyValuePair<string, Action<ModuleModeUserInput>> pair in SubCommands)
             {
                 commandList.Add(pair.Key);
             }

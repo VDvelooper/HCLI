@@ -1,6 +1,6 @@
-﻿namespace HCLI.Program.Base
+﻿namespace HCLI.Program.ModuleCore.Abstractions
 {
-    internal interface ICommandModule
+    public interface ICommandModule
     {
         string Name { get; set; }
         string ModuleCommand { get; set; }

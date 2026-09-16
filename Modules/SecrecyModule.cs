@@ -1,5 +1,6 @@
 ﻿using HCLI.Modules.Secrecy;
-using HCLI.Program.Base;
+using HCLI.Program.ModuleCore.Shared;
+using HCLI.Program.ModuleCore.Abstractions;
 using System.Text.Json;
 
 namespace HCLI.Modules
@@ -29,7 +30,7 @@ namespace HCLI.Modules
         }
 
 
-        public void Execute(UserModuleModeInput currentInput)
+        public void Execute(ModuleModeUserInput currentInput)
         {
             if (!TryLoadConfig())
                 InintialSetUp();
@@ -43,7 +44,7 @@ namespace HCLI.Modules
                 Console.Write("Secrecy > ");
                 string userInput = Console.ReadLine();
 
-                UserModuleModeInput newInput = new UserModuleModeInput(userInput);
+                ModuleModeUserInput newInput = new ModuleModeUserInput(userInput);
 
                 SubCommandParser(newInput);
             }
@@ -259,7 +260,7 @@ namespace HCLI.Modules
             return configAbsolutePath;
         }
 
-        public void CreateSinglePathVault(UserModuleModeInput userInput)
+        public void CreateSinglePathVault(ModuleModeUserInput userInput)
         {
             List<string> convertedArgs = userInput.Args.ToList();
 
@@ -338,7 +339,7 @@ namespace HCLI.Modules
             Console.Write($"\nVault has been created under the ownership's name: {ownerName}.\n");
         }
 
-        private void TestCommand(UserModuleModeInput _)
+        private void TestCommand(ModuleModeUserInput _)
         {
             Console.WriteLine("\nSecrecy > Test success!\n");
         }

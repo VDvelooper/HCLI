@@ -1,16 +1,16 @@
 ﻿using System.Text.Json;
 
-namespace HCLI.Program
+namespace HCLI.Program.Core.Configuration
 {
     public class ConfigManager
     {
-        public Base.ConfigData ConfigData { get; private set; }
+        public ConfigData ConfigData { get; private set; }
 
         public string CLI_USER_INPUT_PREFIX = "";
 
         public ConfigManager()
         {
-            ConfigData = new Base.ConfigData();
+            ConfigData = new ConfigData();
             ConfigData.MainDirectoryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\HCLI";
             ConfigData.ConfigAbsolutePath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\HCLI\config.json";
         }
@@ -50,7 +50,7 @@ namespace HCLI.Program
             }
 
             string fileContent = File.ReadAllText(ConfigData.ConfigAbsolutePath);
-            ConfigData = JsonSerializer.Deserialize<Base.ConfigData>(fileContent);
+            ConfigData = JsonSerializer.Deserialize<ConfigData>(fileContent);
         }
 
         public void SaveConfig()
@@ -76,32 +76,6 @@ namespace HCLI.Program
 
             File.WriteAllText(ConfigData.ConfigAbsolutePath, fileContent);
             ConfigData = ConfigData;
-        }
-    }
-}
-
-
-namespace HCLI.Program.Base // PLEASE rework these
-{
-    public class ConfigData
-    {
-        public string UserName { get; set; }
-        public bool SetupComplete { get; set; }
-        public string MainDirectoryPath { get; set; }
-        public string ConfigAbsolutePath { get; set; }
-    }
-
-    public class ModuleData
-    {
-        public string Name { get; private set; }
-        public string ModuleCommand { get; private set; }
-        public Action<UserModuleModeInput> Execute { get; private set; }
-
-        public ModuleData(string name, string command, Action<UserModuleModeInput> execute)
-        {
-            Name = name;
-            ModuleCommand = command;
-            Execute = execute;
         }
     }
 }

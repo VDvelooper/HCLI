@@ -1,5 +1,6 @@
 ﻿using HCLI.Modules;
-using HCLI.Program.Base;
+//using HCLI.Program.Base;
+using HCLI.Program.ModuleCore;
 
 namespace HCLI.Program
 {
@@ -39,7 +40,7 @@ namespace HCLI.Program
         }
 
 
-        public bool TryExecutingCommandFromModule(UserInput userInput)
+        public bool TryExecutingCommandFromModule(Core.Shared.UserInput userInput)
         {
             foreach (ModuleData module in AVALIBLE_MODULES)
             {

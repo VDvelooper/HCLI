@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Program\Base\NewFolder\" />
+    <Folder Include="Program\Core\Abstractions\" />
   </ItemGroup>
 
 </Project>

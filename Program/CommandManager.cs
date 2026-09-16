@@ -1,4 +1,5 @@
-﻿using HCLI.Program.Base;
+﻿using HCLI.Program.Core.Shared;
+using HCLI.Program.ModuleCore;
 
 namespace HCLI.Program
 {

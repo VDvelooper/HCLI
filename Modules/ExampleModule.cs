@@ -1,4 +1,5 @@
-﻿using HCLI.Program.Base;
+﻿using HCLI.Program.ModuleCore.Shared;
+using HCLI.Program.ModuleCore.Abstractions;
 
 namespace HCLI.Modules
 {
@@ -15,13 +16,13 @@ namespace HCLI.Modules
         }
 
 
-        public void Execute(UserModuleModeInput userInput) { }
+        public void Execute(ModuleModeUserInput userInput) { }
 
 
         // --  Module commands  -- //
 
 
-        private void ExampleModuleCommand(UserModuleModeInput userInput)
+        private void ExampleModuleCommand(ModuleModeUserInput userInput)
         {
             Console.WriteLine($"This is a test command! Called from {userInput.ModuleCommand}");
         }
