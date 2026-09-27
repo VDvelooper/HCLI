@@ -1,49 +1,46 @@
 ﻿using HCLI.Program.Core.Shared;
 using HCLI.Program.ModuleCore;
+using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Commands;
 
 namespace HCLI.Program
 {
-    public class CommandManager
+    public class CommandRegistry
     {
 
         /// <summary>
         /// All variables related to finding the user given command and it's representitive method.
         /// </summary>
-        public Dictionary<string, Action<List<string>>> Commands;
+        public Dictionary<string, ICommand> Commands;
 
-        public CommandManager()
+        public CommandRegistry()
         {
+
+            CMD_Exit cmd_exit = new("exit", "Exits HCLI.");
+            CMD_Help cmd_help = new("help", "Writes out all the base commands.");
+            CMD_Echo cmd_echo = new("echo <the message>", "Outputs the text followed by the 'echo' keyword.");
+            CMD_Clear cmd_clear = new("clear", "Clears the console.");
+            CMD_ListAvalibleModules cmd_lam = new("lam", "Writes out all the avalible modules.");
+
             Commands = new()
             {
-                {
-                    "exit",
-                    args => Exit(args)
-                },
-                {
-                    "echo",
-                    args => Echo(args)
-                },
-                {
-                    "help",
-                    args => Help(args)
-                },
-                {
-                    "clear",
-                    args => Clear(args)
-                },
-                {
-                    "lam",
-                    args => ListAvalibleModules(args)
-                }
+                { "exit", cmd_exit },
+                { "help", cmd_help },
+                { "echo", cmd_echo },
+                { "clear", cmd_clear },
+                { "lam", cmd_lam }
             };
         }
 
 
-        public void CommandParser(UserInput userInput)
+        /// <summary>
+        /// DEPRICATED
+        /// </summary>
+        public void CommandExecuter(UserInput userInput)
         {
             if (Commands.ContainsKey(userInput.Command))
             {
-                Commands[userInput.Command](userInput.Args);
+                Commands[userInput.Command].Execute(userInput);
             }
             else if (Runtime.ModuleRegistry.MODULE_DATABASE.ContainsKey(userInput.Command))
             {
@@ -55,6 +52,7 @@ namespace HCLI.Program
                 return;
             }
         }
+
 
         public static bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
         {
