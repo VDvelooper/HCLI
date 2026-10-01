@@ -7,11 +7,15 @@ namespace HCLI.Program.Core.Commands
     public class CMD_ListAvalibleModules : ICommand
     {
         public string Syntax { get; }
+        public int RequiredArgCount { get; }
+        public int OptionalArgCount { get; }
         public string Description { get; }
 
-        public CMD_ListAvalibleModules(string syntax, string description)
+        public CMD_ListAvalibleModules(string syntax, int requiredArgCount, int optionalArgCount, string description)
         {
             Syntax = syntax;
+            RequiredArgCount = requiredArgCount;
+            OptionalArgCount = optionalArgCount;
             Description = description;
         }
 

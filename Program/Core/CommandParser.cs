@@ -78,26 +78,31 @@ namespace HCLI.Program.Core
         private readonly Lexer _lexer = new Lexer();
         private readonly FlagRegistry _flagRegistry = new FlagRegistry();
 
-        public UserInput Parse(string rawInput) // lehetne static?
+        public UserInput? Parse(string rawInput) // lehetne static?
         {
             List<string> tokens = _lexer.Tokenize(rawInput);
 
             if (tokens.Count == 0) {
-                throw new System.ArgumentException("Internal error: ParseException - Tokens count needs to be more than 0.");
+                return null;
+                //throw new System.ArgumentException("Internal error: ParseException - Tokens count needs to be more than 0.");
             }
 
             string command = tokens[0];
-            List<string> args = new List<string>();
+            List<string> reqArgs = new List<string>();
+            List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
+
+            int _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
+            int _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
 
             for (int i = 1; i < tokens.Count; i++)
             {
                 string token = tokens[i];
 
-                if (IsFlagToken(token))
+                if (IsTokenFlag(token))
                 {
-                    if (!_flagRegistry.TryGet(tokens[i], out var foundFlag))
-                        throw new System.ArgumentException($"Ismeretlen flag: {tokens[i]}");
+                    if (!_flagRegistry.TryGet(token, out var foundFlag))
+                        throw new System.ArgumentException($"Ismeretlen flag: {token}");
 
                     ParsedFlag parsedFlag = new ParsedFlag(foundFlag);
 
@@ -105,20 +110,49 @@ namespace HCLI.Program.Core
                         ? GetFlagValues(tokens, ref i, foundFlag)
                         : null;
 
-                    parsedFlag.Values.AddRange(values);
+                    if (values != null)
+                    {
+                        parsedFlag.Values.AddRange(values);
+                    }
+                    
                     flags.Add(parsedFlag);
                 }
-                else {
-                    args.Add(tokens[i]);
+                else
+                {
+                    var parsedCommand = Runtime.CommandRegistry.Commands[command];
+                    string arg = tokens[i];
+
+                    if (_reqArgsRemain > 0)
+                    {
+                        reqArgs.Add(arg);
+                        _reqArgsRemain--;
+                    }
+                    else if (_optArgsRemain > 0)
+                    {
+                        optArgs.Add(arg);
+                        _optArgsRemain--;
+                    }
                 }
             }
             
-            return new UserInput(command, args, flags);
+            return new UserInput(command, reqArgs, optArgs, flags, rawInput);
         }
 
-        // innen mind AI
+        public void ExecuteCommand(UserInput? userInput)
+        {
+            if (userInput == null) return;
+            Runtime.CommandRegistry.Commands[userInput.Command].Execute(userInput);
 
-        private bool IsFlagToken(string token) => token.StartsWith("--");
+            if (userInput.TryGetFlag(FlagID.Debug, out _))
+                Console.WriteLine(
+                    $"Debug" +
+                    $"Full command: {userInput.Raw}"
+                );
+        }
+
+        private bool IsTokenFlag(string token) => token.StartsWith("--");
+
+        
 
         private List<string> GetFlagValues(List<string> tokens, ref int i, FlagDefinition flagDef)
         {

@@ -7,32 +7,25 @@ namespace HCLI.Program.Core.Shared
         public string Raw;
 
         public string Command;
-        public List<string> Args;
+        public List<string> RequiredArgs;
+        public List<string> OptionalArgs;
 
-        public bool IsFlagged { get { return DetectedFlags.Any; } }
-        public Flags DetectedFlags { get; set; }
-        public List<ParsedFlag> DetectedFlags2 { get; set; }
+        public bool IsFlagged { get { return DetectedFlags.Count > 0; } }
+        public List<ParsedFlag> DetectedFlags { get; set; }
 
-        public UserInput() 
-        { 
-            DetectedFlags = new Flags();
-        }
-        public UserInput(string command, List<string> args, List<ParsedFlag> flags) 
-        { 
-            Command = command;
-            Args = args;
-            DetectedFlags2 = flags;
-        }
-
-        public UserInput(string rawInput)
+        public UserInput(string command, List<string> requiredArgs, List<string> optionalArgs, List<ParsedFlag> flags, string raw) 
         {
-            Raw = rawInput;
-            List<string> splittedCommand = rawInput.Split(' ').ToList();
+            Raw = raw;
+            Command = command;
+            RequiredArgs = requiredArgs;
+            OptionalArgs = optionalArgs;
+            DetectedFlags = flags;
+        }
 
-            Command = splittedCommand[0];
-            Args = splittedCommand;
-
-            Args.Remove(Command);
+        public bool TryGetFlag(FlagID id, out ParsedFlag found)
+        {
+            found = DetectedFlags.Where(x => x.FlagID == id).FirstOrDefault();
+            return DetectedFlags.Where(x => x.FlagID == id).Any();
         }
 
         public ModuleModeUserInput ToModuleModeInput()

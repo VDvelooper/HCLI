@@ -1,6 +1,9 @@
 ﻿using HCLI.Modules;
+using HCLI.Program.Core.Shared;
+
 //using HCLI.Program.Base;
 using HCLI.Program.ModuleCore;
+using System.Security.Cryptography.X509Certificates;
 
 namespace HCLI.Program
 {
@@ -45,6 +48,20 @@ namespace HCLI.Program
             foreach (ModuleData module in AVALIBLE_MODULES)
             {
                 if (module.ModuleCommand == userInput.Command)
+                {
+                    module.Execute.Invoke(userInput.ToModuleModeInput());
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TryGetModuleCommand(string command, out Core.Abstractions.ICommand found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
+        {
+            foreach (ModuleData module in AVALIBLE_MODULES)
+            {
+                if (module.ModuleCommand == command)
                 {
                     module.Execute.Invoke(userInput.ToModuleModeInput());
                     return true;

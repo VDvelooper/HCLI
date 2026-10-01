@@ -9,8 +9,8 @@ namespace HCLI.Program
         public FlagRegistry()
         {
 
-            FlagDefinition flag_debug = new FlagDefinition("--debug");
-            FlagDefinition flag_flags = new FlagDefinition("--flags");
+            FlagDefinition flag_debug = new FlagDefinition("--debug", Core.FlagID.Debug);
+            FlagDefinition flag_flags = new FlagDefinition("--flags", Core.FlagID.Debug);
 
             Flags = new()
             {

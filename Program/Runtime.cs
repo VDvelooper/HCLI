@@ -52,10 +52,10 @@ namespace HCLI.Program
             while (SessionData.Running)
             {
                 Console.Write("HCLI > ");
-                string userInput = Console.ReadLine();
+                string rawInput = Console.ReadLine();
 
-                Core.Shared.UserInput currentInput = CommandParser.Parse(userInput);
-                CommandRegistry.CommandExecuter(currentInput); // <- külön class?
+                Core.Shared.UserInput userInput = CommandParser.Parse(rawInput);
+                CommandParser.ExecuteCommand(userInput);
             }
         }
 

@@ -3,17 +3,18 @@
     public class FlagDefinition
     {
         public string Syntax { get; set; }
+        public FlagID FlagID { get; }
         public bool Status { get; set; }
         public bool RequiresValue { get; set; }
         public int RequiredValueCount { get; set; }
         public List<string> Values { get; set; }
 
-        public FlagDefinition(string syntax)
+        public FlagDefinition(string syntax, FlagID id)
         {
             Values = new List<string>();
             Syntax = syntax;
         }
-        public FlagDefinition(string syntax, bool requiresValue, int requiredValueCount)
+        public FlagDefinition(string syntax, FlagID id, bool requiresValue, int requiredValueCount)
         {
             Values = new List<string>();
             Syntax = syntax;

@@ -16,11 +16,11 @@ namespace HCLI.Program
         public CommandRegistry()
         {
 
-            CMD_Exit cmd_exit = new("exit", "Exits HCLI.");
-            CMD_Help cmd_help = new("help", "Writes out all the base commands.");
-            CMD_Echo cmd_echo = new("echo <the message>", "Outputs the text followed by the 'echo' keyword.");
-            CMD_Clear cmd_clear = new("clear", "Clears the console.");
-            CMD_ListAvalibleModules cmd_lam = new("lam", "Writes out all the avalible modules.");
+            CMD_Exit cmd_exit = new("exit", 0, 0, "Exits HCLI.");
+            CMD_Help cmd_help = new("help", 0, 1, "Writes out all the base commands.");
+            CMD_Echo cmd_echo = new("echo <the message>", 1, 0, "Outputs the text followed by the 'echo' keyword.");
+            CMD_Clear cmd_clear = new("clear", 0, 0, "Clears the console.");
+            CMD_ListAvalibleModules cmd_lam = new("lam", 0, 0, "Writes out all the avalible modules.");
 
             Commands = new()
             {
@@ -31,28 +31,6 @@ namespace HCLI.Program
                 { "lam", cmd_lam }
             };
         }
-
-
-        /// <summary>
-        /// DEPRICATED
-        /// </summary>
-        public void CommandExecuter(UserInput userInput)
-        {
-            if (Commands.ContainsKey(userInput.Command))
-            {
-                Commands[userInput.Command].Execute(userInput);
-            }
-            else if (Runtime.ModuleRegistry.MODULE_DATABASE.ContainsKey(userInput.Command))
-            {
-                Runtime.ModuleRegistry.TryExecutingCommandFromModule(userInput);
-            }
-            else
-            {
-                Console.WriteLine($"HCLI > The command '{userInput.Command}' is unknown.\n");
-                return;
-            }
-        }
-
 
         public static bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
         {

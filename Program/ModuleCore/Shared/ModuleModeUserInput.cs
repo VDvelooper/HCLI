@@ -21,11 +21,5 @@ namespace HCLI.Program.ModuleCore.Shared
             Args.AddRange(_splitted);
             Args.Remove(ModuleCommand); // we remove the command part of the input
         }
-
-        public UserInput ToUserInput()
-        {
-            UserInput converted = new UserInput(Raw);
-            return converted;
-        }
     }
 }
