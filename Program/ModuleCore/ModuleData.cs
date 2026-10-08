@@ -1,6 +1,4 @@
 ﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
-using HCLI.Program.ModuleCore.Abstractions;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.ModuleCore

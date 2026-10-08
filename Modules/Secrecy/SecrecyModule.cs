@@ -1,7 +1,6 @@
 ﻿using HCLI.Modules.Secrecy.Commands;
 using HCLI.Program.Core;
 using HCLI.Program.Core.Shared;
-using HCLI.Program.ModuleCore.Abstractions;
 using HCLI.Program.ModuleCore.Shared;
 using System.Text.Json;
 
@@ -35,23 +34,26 @@ namespace HCLI.Modules.Secrecy
         }
 
 
-        public void ModuleExecute(UserInput userInput)
+        public override void ModuleExecute(UserInput userInput)
         {
+            IsSeparateModeRunning = true;
+
             if (!TryLoadConfig())
                 InintialSetUp();
 
             ManageAccount();
-
-            SubCommandParser(userInput);
 
             while (IsSeparateModeRunning)
             {
                 Console.Write("Secrecy > ");
                 string newRawInput = Console.ReadLine();
 
-                UserInput newUserInput = CommandParser.Parse(newRawInput);
+                UserInput? newUserInput = CommandParser.Parse(newRawInput, false);
 
-                CommandExecuter.ExecuteCommand(userInput);
+                if (newUserInput != null)
+                    CommandExecuter.ExecuteCommand(userInput);
+                else
+                    throw new ArgumentNullException($"Parsing returned no value.");
             }
 
             SaveConfig();
@@ -148,6 +150,7 @@ namespace HCLI.Modules.Secrecy
                 {
                     Console.WriteLine("Log-in or create a new account. Commands: login / new\n");
 
+                    Console.Write("Secrecy > ");
                     string inputAnwser = Console.ReadLine();
                     while (inputAnwser != "login" || inputAnwser != "new")
                     {

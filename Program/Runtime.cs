@@ -48,7 +48,7 @@ namespace HCLI.Program
                 Console.Write("HCLI > ");
                 string rawInput = Console.ReadLine();
 
-                Core.Shared.UserInput? userInput = CommandParser.Parse(rawInput);
+                Core.Shared.UserInput? userInput = CommandParser.Parse(rawInput, true);
 
                 CommandExecuter.ExecuteCommand(userInput);
             }

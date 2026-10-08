@@ -15,12 +15,14 @@ namespace HCLI.Modules.ExampleModule
 
         public override void ModuleExecute(UserInput userInput) 
         {
+            IsSeparateModeRunning = true;
+
             while (IsSeparateModeRunning)
             {
                 Console.Write("ExampleModule > ");
                 string newRawInput = Console.ReadLine();
 
-                UserInput? newUserInput = Program.Core.CommandParser.Parse(newRawInput);
+                UserInput? newUserInput = Program.Core.CommandParser.Parse(newRawInput, false);
 
                 if (newUserInput != null) 
                     Program.Core.CommandExecuter.ExecuteCommand(userInput);

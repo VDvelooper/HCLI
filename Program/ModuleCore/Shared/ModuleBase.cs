@@ -30,6 +30,10 @@ namespace HCLI.Program.ModuleCore.Shared
             BaseCommands = new Dictionary<string, Action<UserInput>>()
             {
                 {
+                    this.ModuleCommand,
+                    args => ModuleExecute(args)
+                },
+                {
                     "exit",
                     args => ExitModuleCommand(args)
                 },
@@ -43,14 +47,6 @@ namespace HCLI.Program.ModuleCore.Shared
                 }
             };
 
-            if (IsSeparateMode)
-            {
-                BaseCommands.Add(
-                    this.ModuleCommand,
-                    args => EnterModuleCommand(args)
-                );
-            }
-
             Console.WriteLine($"MODULE_DATA_DIR_PATH:{MODULE_DATA_DIR_PATH}");
 
             if (!Path.Exists(MODULE_DATA_DIR_PATH))
@@ -60,28 +56,6 @@ namespace HCLI.Program.ModuleCore.Shared
 
         public virtual void ModuleExecute(UserInput userInput) { }
 
-        public void SubCommandParser(UserInput userInput)
-        {
-            string subCommand = "";
-
-            if (BaseCommands.ContainsKey(userInput.Command))
-            {
-                BaseCommands[userInput.Command](userInput);
-            }
-            else
-            {
-                Console.WriteLine($"{ModuleName}> The module command '{userInput.Command}' is unknown.\n");
-                return;
-            }
-        }
-
-        private void EnterModuleCommand(UserInput _)
-        {
-            if (!IsSeparateMode) return;
-            if (IsSeparateModeRunning) return;
-
-            IsSeparateModeRunning = true;
-        }
         private void ExitModuleCommand(UserInput _)
         {
             if (!IsSeparateMode) return;

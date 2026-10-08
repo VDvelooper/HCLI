@@ -8,7 +8,7 @@ namespace HCLI.Program.Core
         private static readonly Lexer _lexer = new Lexer();
         private static readonly FlagRegistry _flagRegistry = new FlagRegistry();
 
-        public static UserInput? Parse(string rawInput) // lehetne static?
+        public static UserInput? Parse(string rawInput, bool root) // lehetne static?
         {
             List<string> tokens = _lexer.Tokenize(rawInput);
 
@@ -25,22 +25,27 @@ namespace HCLI.Program.Core
             int _reqArgsRemain = 0;
             int _optArgsRemain = 0;
 
-            if (Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
+            if (root && Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
             {
                 _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
                 _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
             }
-            else if (Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
+            else if (!root && Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
             {
                 if (foundCommand == null) throw new System.ArgumentException($"Command was not found. command: {command}"); 
 
                 _reqArgsRemain = foundCommand.RequiredArgCount;
                 _optArgsRemain = foundCommand.OptionalArgCount;
             }
+            else if (!root && Runtime.ModuleRegistry.TryGetBaseCommand(command, out Action<UserInput>? found))
+            {
+                _reqArgsRemain = 0; // zzz -> a base command-okat át kellene írni ICommand-ra.
+                _optArgsRemain = 0;
+            }
 
 
-           for (int i = 1; i < tokens.Count; i++)
-           {
+            for (int i = 1; i < tokens.Count; i++)
+            {
                string token = tokens[i];
 
                if (IsTokenFlag(token))
@@ -65,8 +70,7 @@ namespace HCLI.Program.Core
                    flags.Add(parsedFlag);
                }
                else
-               {
-                   var parsedCommand = Runtime.CommandRegistry.Commands[command];
+               { // parsing the arguments
                    string arg = tokens[i];
 
                    if (_reqArgsRemain > 0)
