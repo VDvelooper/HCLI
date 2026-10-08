@@ -7,29 +7,33 @@ namespace HCLI.Program.Core
         public static void ExecuteCommand(UserInput? userInput)
         {
             if (userInput == null) return;
-            Console.WriteLine($"command: {userInput.Command}, reqargs: {userInput.RequiredArgs.Count}");
-            
+
             if (Runtime.CommandRegistry.TryGetHCLICommand(userInput.Command, out var foundHCLICommand))
             {
-                Console.WriteLine("1");
-                if (foundHCLICommand != null) { foundHCLICommand.Execute(userInput); return; }
-                else
-                    Console.WriteLine("valami szar...");
-            }
-            else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput, out var foundModuleCommand) && foundModuleCommand != null)
-            {
-                Console.WriteLine("2");
-                foundModuleCommand.Execute(userInput);
-                return;
-            }
+                if (foundHCLICommand != null)
+                {
+                    foundHCLICommand.Execute(userInput);
+                }
+                else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput, out var foundModuleCommand) && foundModuleCommand != null)
+                {
+                    foundModuleCommand.Execute(userInput);
+                }
 
-            Console.WriteLine("3");//zzz -> valamiért az echo kommandnál csak ez fut le...
-
-            if (userInput.TryGetFlag(FlagID.Debug, out _))
-                Console.WriteLine(
-                    $"Debug" +
-                    $"Full command: {userInput.Raw}"
-                );
+                if (userInput.TryGetFlag(FlagID.Debug, out _))
+                {
+                    Console.WriteLine(
+                        $"Debug details:\n" +
+                        $"Full command: {userInput.Raw}\n" +
+                        $"Required args count: {userInput.RequiredArgs.Count}\n" +
+                        $"Optional args count: {userInput.OptionalArgs.Count}"
+                    );
+                    Console.WriteLine("Found flags:");
+                    userInput.DetectedFlags.ForEach(flag => Console.WriteLine($"  {flag.FlagDefinition.Name}"));
+                    Console.WriteLine();
+                }
+                    
+            }
         }
     }
 }
+
