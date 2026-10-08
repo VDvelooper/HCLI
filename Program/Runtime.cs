@@ -8,15 +8,9 @@ namespace HCLI.Program
     {
         // public services
         public static CommandRegistry CommandRegistry { get; private set; }
-
         public static ConfigManager ConfigManager { get; private set; }
         public static Session.SessionData SessionData { get; private set; }
-
         public static ModuleRegistry ModuleRegistry { get; private set; }
-
-
-        // non-public services
-        private static CommandParser CommandParser { get; } = new CommandParser();
 
         private static void Main(string[] args)
         {
@@ -54,8 +48,9 @@ namespace HCLI.Program
                 Console.Write("HCLI > ");
                 string rawInput = Console.ReadLine();
 
-                Core.Shared.UserInput userInput = CommandParser.Parse(rawInput);
-                CommandParser.ExecuteCommand(userInput);
+                Core.Shared.UserInput? userInput = CommandParser.Parse(rawInput);
+
+                CommandExecuter.ExecuteCommand(userInput);
             }
         }
 

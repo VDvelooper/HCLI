@@ -1,5 +1,4 @@
-﻿using HCLI.Program.Core.Shared;
-using HCLI.Program.ModuleCore;
+﻿using HCLI.Program.ModuleCore;
 using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Commands;
 
@@ -32,7 +31,13 @@ namespace HCLI.Program
             };
         }
 
-        public static bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
+        public bool TryGetHCLICommand(string command, out Program.Core.Abstractions.ICommand? found)
+        {
+            found = Commands.Where(x=>x.Value.Syntax == command).Select(x => x.Value).FirstOrDefault();
+            return found != null;
+        }
+
+        public bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
         {
             return args.Count == expectedArgsCount - 1;
         }

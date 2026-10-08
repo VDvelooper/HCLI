@@ -1,4 +1,5 @@
-﻿using HCLI.Modules;
+﻿using HCLI.Modules.ExampleModule;
+using HCLI.Modules.Secrecy;
 using HCLI.Program.Core.Shared;
 
 //using HCLI.Program.Base;
@@ -14,7 +15,7 @@ namespace HCLI.Program
         public ModuleData MODULE_SECRECY;
         public List<ModuleData> AVALIBLE_MODULES; // szeretném hogy lehessen külön kiválasztani, hogy milyen modulok legyenek betöltve (1)
 
-        // -- Variables -- //
+        // -- Fields -- //
 
         public Dictionary<string, ModuleData> MODULE_DATABASE;
 
@@ -23,11 +24,13 @@ namespace HCLI.Program
         {
 
             // -- base object initialization -- //    <- (1) Ezeket csak akkor inicializálnánk, ha a felhasználó kiválasztja (mondjuk külső forrásból) a modult betöltésre
-            CLASS_SECRECY = new SecrecyModule("Secrecy", "secrecy", true);
+            CLASS_EXAMPLE = new ExampleModule(true);
+            CLASS_SECRECY = new SecrecyModule(true);
+            
 
 
             // -- data object initialization -- //
-            MODULE_SECRECY = new ModuleData(CLASS_SECRECY.ModuleName, CLASS_SECRECY.ModuleCommand, CLASS_SECRECY.Execute);
+            MODULE_SECRECY = new ModuleData(CLASS_SECRECY.ModuleName, CLASS_SECRECY.ModuleCommand, CLASS_SECRECY, CLASS_SECRECY.SubCommands);
 
 
 
@@ -49,7 +52,7 @@ namespace HCLI.Program
             {
                 if (module.ModuleCommand == userInput.Command)
                 {
-                    module.Execute.Invoke(userInput.ToModuleModeInput());
+                    module.Module.ModuleExecute(userInput);
                     return true;
                 }
             }
@@ -57,15 +60,17 @@ namespace HCLI.Program
             return false;
         }
 
-        public bool TryGetModuleCommand(string command, out Core.Abstractions.ICommand found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
+        public bool TryGetModuleCommand(Core.Shared.UserInput userInput, out Core.Abstractions.ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
         {
+            found = null;
+
             foreach (ModuleData module in AVALIBLE_MODULES)
             {
-                if (module.ModuleCommand == command)
-                {
-                    module.Execute.Invoke(userInput.ToModuleModeInput());
-                    return true;
-                }
+                if (!module.SubCommands.Where(x => x.Syntax == userInput.Command).Any()) 
+                    continue;
+
+                found = module.SubCommands.Where(x => x.Syntax == userInput.Command).First();
+                return true;
             }
 
             return false;
@@ -74,6 +79,7 @@ namespace HCLI.Program
 
         // -- Source Sets -- //
 
+        private readonly ExampleModule CLASS_EXAMPLE;
         private readonly SecrecyModule CLASS_SECRECY;
 
     }

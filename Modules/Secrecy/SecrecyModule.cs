@@ -1,52 +1,57 @@
-﻿using HCLI.Modules.Secrecy;
-using HCLI.Program.ModuleCore.Shared;
+﻿using HCLI.Modules.Secrecy.Commands;
+using HCLI.Program.Core;
+using HCLI.Program.Core.Shared;
 using HCLI.Program.ModuleCore.Abstractions;
+using HCLI.Program.ModuleCore.Shared;
 using System.Text.Json;
 
-namespace HCLI.Modules
+namespace HCLI.Modules.Secrecy
 {
-    public class SecrecyModule : ModuleBase, IModule
+    public class SecrecyModule : ModuleBase
     {
+
 
         public bool SETUP_COMPLETE = false;
         public string USERNAME = "";
 
-        public string MAIN_DIRECTORY_PATH = $@"{MODULE_DATA_DIR_PATH}\Secrecy";
-        public string CONFIG_ABSOLUTE_PATH = @$"{MODULE_DATA_DIR_PATH}\Secrecy\config.hclidata";
-        public string USERS_ABSOLUTE_PATH = @$"{MODULE_DATA_DIR_PATH}\Secrecy\Data\users.hclidata";
+        public static string MAIN_DIRECTORY_PATH = $@"{MODULE_DATA_DIR_PATH}\Secrecy";
+        public static string CONFIG_ABSOLUTE_PATH = @$"{MODULE_DATA_DIR_PATH}\Secrecy\config.hclidata";
+        public static string USERS_ABSOLUTE_PATH = @$"{MODULE_DATA_DIR_PATH}\Secrecy\Data\users.hclidata";
 
-        public SecrecyModule(string Name, string ModuleCommand, bool separateMode) : base(
-            Name,
-            ModuleCommand,
-            separateMode
-        )
+        public SecrecyModule(bool isSeparateMode) : base("Secrecy", "secrecy", isSeparateMode)
         {
-            Name = "Secrecy";
-            ModuleCommand = "secrecy";
 
-            SubCommands.Add("cv", args => this.CreateSinglePathVault(args));
-            SubCommands.Add("setup", args => this.InintialSetUp());
-            SubCommands.Add("test", args => TestCommand(args));
+            // new good way *1
+            CMD_CreateVault cmd_createVault = new CMD_CreateVault("cv", 1, 0, "Creates a new password vault on the file path that is given in parenthesies.");
+
+
+            SubCommands.Add(cmd_createVault);
+
+
+            // depricated *1
+            /*BaseCommands.Add("cv", args => CreateSinglePathVault(args));
+            BaseCommands.Add("setup", args => InintialSetUp());
+            BaseCommands.Add("test", args => TestCommand(args));*/
         }
 
 
-        public void Execute(ModuleModeUserInput currentInput)
+        public void ModuleExecute(UserInput userInput)
         {
             if (!TryLoadConfig())
                 InintialSetUp();
 
             ManageAccount();
 
-            SubCommandParser(currentInput);
+            SubCommandParser(userInput);
 
-            while (_separateModeRunning)
+            while (IsSeparateModeRunning)
             {
                 Console.Write("Secrecy > ");
-                string userInput = Console.ReadLine();
+                string newRawInput = Console.ReadLine();
 
-                ModuleModeUserInput newInput = new ModuleModeUserInput(userInput);
+                UserInput newUserInput = CommandParser.Parse(newRawInput);
 
-                SubCommandParser(newInput);
+                CommandExecuter.ExecuteCommand(userInput);
             }
 
             SaveConfig();
@@ -81,7 +86,7 @@ namespace HCLI.Modules
 
                 Console.WriteLine($"\nSetup complete {userName}! You can find the config file here: {CONFIG_ABSOLUTE_PATH}\n\n");
 
-                CONFIG_ABSOLUTE_PATH = CreateConfigFile(userName, MAIN_DIRECTORY_PATH, null);
+                CONFIG_ABSOLUTE_PATH = CreateConfigFile(userName, MAIN_DIRECTORY_PATH, new List<string>());
                 USERNAME = userName;
             }
 
@@ -93,7 +98,7 @@ namespace HCLI.Modules
             if (!Path.Exists(CONFIG_ABSOLUTE_PATH)) return false;
 
             string json = File.ReadAllText(CONFIG_ABSOLUTE_PATH);
-            Secrecy.ConfigData configData = JsonSerializer.Deserialize<Secrecy.ConfigData>(json);
+            ConfigData configData = JsonSerializer.Deserialize<ConfigData>(json);
 
             SETUP_COMPLETE = configData.SetupComplete;
             CONFIG_ABSOLUTE_PATH = configData.configAbsolutePath;
@@ -107,7 +112,7 @@ namespace HCLI.Modules
             if (!Path.Exists(CONFIG_ABSOLUTE_PATH)) return;
 
             string json = File.ReadAllText(CONFIG_ABSOLUTE_PATH);
-            Secrecy.ConfigData configData = JsonSerializer.Deserialize<Secrecy.ConfigData>(json);
+            ConfigData configData = JsonSerializer.Deserialize<ConfigData>(json);
 
 
             configData.SetupComplete = SETUP_COMPLETE;
@@ -130,7 +135,7 @@ namespace HCLI.Modules
 
                 CreateUser(ref userData);
                 
-                string fileContent = JsonSerializer.Serialize<UserData>(userData);
+                string fileContent = JsonSerializer.Serialize(userData);
 
                 File.WriteAllText(USERS_ABSOLUTE_PATH, fileContent);
             }
@@ -243,7 +248,7 @@ namespace HCLI.Modules
         /// <returns>The config file's path as a string. Used to set CONFIG_PATH.</returns>
         private string CreateConfigFile(string userName, string? mainDirectoryPath, List<string>? vaultPaths)
         {
-            Secrecy.ConfigData configData = new Secrecy.ConfigData();
+            ConfigData configData = new ConfigData();
 
             configData.Username = userName;
             configData.mainDirectoryPath = mainDirectoryPath;
@@ -331,7 +336,7 @@ namespace HCLI.Modules
             }
 
 
-            Secrecy.Vault newVault = new Secrecy.Vault(ownerName, masterKey);
+            Vault newVault = new Vault(ownerName, masterKey);
 
             string json = JsonSerializer.Serialize(newVault);
             File.WriteAllText(@$"{savePath}\vault.json", json);
@@ -406,10 +411,10 @@ namespace HCLI.Modules.Secrecy
 
         public Vault(string ownerName, string masterKey)
         {
-            this.OwnerName = ownerName;
-            this.MasterKey = masterKey;
+            OwnerName = ownerName;
+            MasterKey = masterKey;
 
-            this.Items = new List<VaultItem>();
+            Items = new List<VaultItem>();
         }
 
     }

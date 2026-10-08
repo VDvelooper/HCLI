@@ -20,7 +20,7 @@ namespace HCLI.Program
         }
 
 
-        public bool TryGet(string syntax, out FlagDefinition found)
+        public bool TryGet(string syntax, out FlagDefinition? found)
         {
             found = Flags.FirstOrDefault(x => x.Syntax == syntax);
             return found != null;

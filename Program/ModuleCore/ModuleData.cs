@@ -1,4 +1,7 @@
-﻿using HCLI.Program.ModuleCore.Shared;
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared;
+using HCLI.Program.ModuleCore.Abstractions;
+using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.ModuleCore
 {
@@ -6,13 +9,15 @@ namespace HCLI.Program.ModuleCore
     {
         public string Name { get; private set; }
         public string ModuleCommand { get; private set; }
-        public Action<ModuleModeUserInput> Execute { get; private set; }
+        public List<ICommand> SubCommands { get; private set; }
+        public ModuleBase Module { get; private set; }
 
-        public ModuleData(string name, string command, Action<ModuleModeUserInput> execute)
+        public ModuleData(string name, string command, ModuleBase module, List<ICommand> subcommands)
         {
             Name = name;
             ModuleCommand = command;
-            Execute = execute;
+            Module = module;
+            SubCommands = subcommands;
         }
     }
 }

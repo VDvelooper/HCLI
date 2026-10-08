@@ -1,82 +1,99 @@
-﻿namespace HCLI.Program.ModuleCore.Shared
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared;
+
+namespace HCLI.Program.ModuleCore.Shared
 {
     public class ModuleBase
     {
-        public string ModuleName { get; protected set; }
-        public string ModuleCommand { get; protected set; }
-        public Dictionary<string, Action<ModuleModeUserInput>> SubCommands { get; set; }
+        public string ModuleName { get; private set; }
+        public string ModuleCommand { get; private set; }
+        public Dictionary<string, Action<UserInput>> BaseCommands { get; set; }
+        public List<ICommand> SubCommands { get; private set; }
+
 
         public static string MODULE_DATA_DIR_PATH = @$"{Runtime.ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
 
         // Instance
 
-        protected bool _separateMode;
-        protected bool _separateModeRunning;
+        protected bool IsSeparateMode;
+        protected bool IsSeparateModeRunning;
 
-        public ModuleBase(string Name, string ModuleCommand, bool separateMode)
+        public ModuleBase(string moduleName, string moduleCommand, bool separateMode)
         {
-            ModuleName = Name;
-            this.ModuleCommand = ModuleCommand;
-            _separateMode = separateMode;
-            _separateModeRunning = false;
+            IsSeparateMode = separateMode;
+            IsSeparateModeRunning = false;
 
-            SubCommands = new()
+            ModuleName = moduleName;
+            ModuleCommand = moduleCommand;
+
+            SubCommands = new List<ICommand>();
+            BaseCommands = new Dictionary<string, Action<UserInput>>()
             {
                 {
                     "exit",
                     args => ExitModuleCommand(args)
                 },
                 {
-                    this.ModuleCommand,
-                    args => EnterModuleCommand(args)
-                },
-                {
                     "help",
                     args => HelpModuleCommand(args)
+                },
+                {
+                    "printdir",
+                    args => PrintDirectory(args)
                 }
             };
+
+            if (IsSeparateMode)
+            {
+                BaseCommands.Add(
+                    this.ModuleCommand,
+                    args => EnterModuleCommand(args)
+                );
+            }
 
             Console.WriteLine($"MODULE_DATA_DIR_PATH:{MODULE_DATA_DIR_PATH}");
 
             if (!Path.Exists(MODULE_DATA_DIR_PATH))
                 Directory.CreateDirectory(MODULE_DATA_DIR_PATH);
+            
         }
 
+        public virtual void ModuleExecute(UserInput userInput) { }
 
-        public void SubCommandParser(ModuleModeUserInput userInput)
+        public void SubCommandParser(UserInput userInput)
         {
             string subCommand = "";
 
-            if (SubCommands.ContainsKey(userInput.ModuleCommand))
+            if (BaseCommands.ContainsKey(userInput.Command))
             {
-                SubCommands[userInput.ModuleCommand](userInput);
+                BaseCommands[userInput.Command](userInput);
             }
             else
             {
-                Console.WriteLine($"{ModuleName}> The module command '{userInput.ModuleCommand}' is unknown.\n");
+                Console.WriteLine($"{ModuleName}> The module command '{userInput.Command}' is unknown.\n");
                 return;
             }
         }
 
-        private void EnterModuleCommand(ModuleModeUserInput userInput)
+        private void EnterModuleCommand(UserInput _)
         {
-            if (!_separateMode) return;
-            if (_separateModeRunning) return;
+            if (!IsSeparateMode) return;
+            if (IsSeparateModeRunning) return;
 
-            _separateModeRunning = true;
+            IsSeparateModeRunning = true;
         }
-        private void ExitModuleCommand(ModuleModeUserInput userInput)
+        private void ExitModuleCommand(UserInput _)
         {
-            if (!_separateMode) return;
-            if (!_separateModeRunning || userInput.Args.Count > 0) return;
+            if (!IsSeparateMode) return;
+            if (!IsSeparateModeRunning) return;
 
-            _separateModeRunning = false;
+            IsSeparateModeRunning = false;
         }
-        private void HelpModuleCommand(ModuleModeUserInput userInput)
+        private void HelpModuleCommand(UserInput _)
         {
             List<string> commandList = new List<string>();
 
-            foreach (KeyValuePair<string, Action<ModuleModeUserInput>> pair in SubCommands)
+            foreach (KeyValuePair<string, Action<UserInput>> pair in BaseCommands)
             {
                 commandList.Add(pair.Key);
             }
@@ -89,6 +106,10 @@
             }
 
             Console.WriteLine();
+        }
+        private void PrintDirectory(UserInput _)
+        {
+            Console.WriteLine($"Module data directory: {MODULE_DATA_DIR_PATH}");
         }
     }
 }
