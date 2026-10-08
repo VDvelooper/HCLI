@@ -1,4 +1,5 @@
-﻿using HCLI.Program.Core.Shared;
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared;
 
 namespace HCLI.Program.Core
 {
@@ -21,58 +22,71 @@ namespace HCLI.Program.Core
             List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
 
-            int _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
-            int _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
-            
-            for (int i = 1; i < tokens.Count; i++)
+            int _reqArgsRemain = 0;
+            int _optArgsRemain = 0;
+
+            if (Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
             {
-                string token = tokens[i];
-
-                if (IsTokenFlag(token))
-                {
-                    if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag))
-                        throw new System.ArgumentException($"Unknown flag. token: {token}");
-
-                    if (foundFlag == null) 
-                        throw new System.ArgumentException($"Flag was not found. token: {token}");
-
-                    ParsedFlag parsedFlag = new ParsedFlag(foundFlag);
-
-                    List<string>? values = parsedFlag.FlagDefinition!.RequiresValue
-                        ? GetFlagValues(tokens, ref i, foundFlag)
-                        : null;
-
-                    if (values != null)
-                    {
-                        parsedFlag.Values.AddRange(values);
-                    }
-                    
-                    flags.Add(parsedFlag);
-                }
-                else
-                {
-                    var parsedCommand = Runtime.CommandRegistry.Commands[command];
-                    string arg = tokens[i];
-
-                    if (_reqArgsRemain > 0)
-                    {
-                        reqArgs.Add(arg);
-                        _reqArgsRemain--;
-                    }
-                    else if (_optArgsRemain > 0)
-                    {
-                        optArgs.Add(arg);
-                        _optArgsRemain--;
-                    }
-                }
+                _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
+                _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
             }
+            else if (Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
+            {
+                if (foundCommand == null) throw new System.ArgumentException($"Command was not found. command: {command}"); 
+
+                _reqArgsRemain = foundCommand.RequiredArgCount;
+                _optArgsRemain = foundCommand.OptionalArgCount;
+            }
+
+
+           for (int i = 1; i < tokens.Count; i++)
+           {
+               string token = tokens[i];
+
+               if (IsTokenFlag(token))
+               {
+                   if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag))
+                       throw new System.ArgumentException($"Unknown flag. token: {token}");
+
+                   if (foundFlag == null)
+                       throw new System.ArgumentException($"Flag was not found. token: {token}");
+
+                   ParsedFlag parsedFlag = new ParsedFlag(foundFlag);
+
+                   List<string>? values = parsedFlag.FlagDefinition!.RequiresValue
+                       ? GetFlagValues(tokens, ref i, foundFlag)
+                       : null;
+
+                   if (values != null)
+                   {
+                       parsedFlag.Values.AddRange(values);
+                   }
+
+                   flags.Add(parsedFlag);
+               }
+               else
+               {
+                   var parsedCommand = Runtime.CommandRegistry.Commands[command];
+                   string arg = tokens[i];
+
+                   if (_reqArgsRemain > 0)
+                   {
+                       reqArgs.Add(arg);
+                       _reqArgsRemain--;
+                   }
+                   else if (_optArgsRemain > 0)
+                   {
+                       optArgs.Add(arg);
+                       _optArgsRemain--;
+                   }
+               }
+           }
 
             return new UserInput(command, reqArgs, optArgs, flags, rawInput);
         }
 
         private static bool IsTokenFlag(string token) => token.StartsWith("--");
 
-        
 
         private static List<string> GetFlagValues(List<string> tokens, ref int i, FlagDefinition flagDef)
         {

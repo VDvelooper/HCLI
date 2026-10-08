@@ -14,7 +14,7 @@ namespace HCLI.Program.Core
                 {
                     foundHCLICommand.Execute(userInput);
                 }
-                else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput, out var foundModuleCommand) && foundModuleCommand != null)
+                else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput.Command, out var foundModuleCommand) && foundModuleCommand != null)
                 {
                     foundModuleCommand.Execute(userInput);
                 }

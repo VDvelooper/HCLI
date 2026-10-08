@@ -60,22 +60,21 @@ namespace HCLI.Program
             return false;
         }
 
-        public bool TryGetModuleCommand(Core.Shared.UserInput userInput, out Core.Abstractions.ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
+        public bool TryGetModuleCommand(string comment, out Core.Abstractions.ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
         {
             found = null;
 
             foreach (ModuleData module in AVALIBLE_MODULES)
             {
-                if (!module.SubCommands.Where(x => x.Syntax == userInput.Command).Any()) 
+                if (!module.SubCommands.Where(x => x.Syntax == comment).Any()) 
                     continue;
 
-                found = module.SubCommands.Where(x => x.Syntax == userInput.Command).First();
+                found = module.SubCommands.Where(x => x.Syntax == comment).First();
                 return true;
             }
 
             return false;
         }
-
 
         // -- Source Sets -- //
 
