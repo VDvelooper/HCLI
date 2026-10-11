@@ -2,6 +2,7 @@
 using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Expecteds;
 using HCLI.Program.ModuleCore;
+using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -23,9 +24,9 @@ namespace HCLI.Program.Core.Commands
         public IFeedback Execute(UserInput userInput)
         {
             Console.WriteLine();
-            foreach (ModuleData module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
+            foreach (ModuleBase module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
             {
-                Console.WriteLine(module.Name);
+                Console.WriteLine(module.ModuleName);
             }
             Console.WriteLine();
             return new ExpectedInput();

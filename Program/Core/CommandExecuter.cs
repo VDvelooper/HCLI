@@ -17,7 +17,7 @@ namespace HCLI.Program.Core
             )
             {
                 feedback = foundHCLICommand.Execute(userInput);
-                ConsoleView.ShowOutputOnConsole(feedback);
+                ConsoleView.ThrowFeedback(feedback);
             }
 
             else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput.Command, out var foundModuleCommand) 
@@ -25,7 +25,7 @@ namespace HCLI.Program.Core
             )
             {
                 feedback = foundModuleCommand.Execute(userInput);
-                ConsoleView.ShowOutputOnConsole(feedback);
+                ConsoleView.ThrowFeedback(feedback);
             }
 
             // this means, that if it is a base command for example: exit or help

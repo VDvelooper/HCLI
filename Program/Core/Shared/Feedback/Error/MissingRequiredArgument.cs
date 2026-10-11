@@ -5,20 +5,18 @@ namespace HCLI.Program.Core.Shared.Feedback.Errors
     public class MissingRequiredArgument : IFeedback
     {
         public FeedbackType ResultType { get; } = FeedbackType.Error;
-        public string FeedbackName { get; } = "Error.MissingRequiredArgument";
-        public string? DebugMessage { get; }
-        public string? ConsoleOutput { get; }
+        public string FeedbackID { get; } = "Error.MissingRequiredArgument";
+        public string? Description { get; }
+        public bool Silent { get; } = false;
+        public string? ConsoleOutputOverride { get; }
         public ConsoleOutputStyle ConsoleOutputStyle { get; private set; } = new(ConsoleColor.DarkRed, ConsoleColor.Black);
 
         public MissingRequiredArgument() { }
-        public MissingRequiredArgument(string? debugMessage)
+        public MissingRequiredArgument(string? description = null, string? consoleOutputOverride = null, bool silent = false)
         {
-            DebugMessage = debugMessage;
-        }
-        public MissingRequiredArgument(string? consoleOutput, string? debugMessage = null)
-        {
-            DebugMessage = debugMessage;
-            ConsoleOutput = consoleOutput;
+            Description = description;
+            ConsoleOutputOverride = consoleOutputOverride;
+            Silent = silent;
         }
     }
 }

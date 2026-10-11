@@ -1,6 +1,7 @@
 ﻿using HCLI.Program.ModuleCore;
 using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Commands;
+using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program
 {
@@ -76,9 +77,9 @@ namespace HCLI.Program
         public void ListAvalibleModules(List<string> args)
         {
             Console.WriteLine();
-            foreach (ModuleData module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
+            foreach (ModuleBase module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
             {
-                Console.WriteLine(module.Name);
+                Console.WriteLine(module.ModuleName);
             }
             Console.WriteLine();
         }

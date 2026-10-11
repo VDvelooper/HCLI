@@ -1,5 +1,6 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.Core.Shared.Feedback.Errors;
 using HCLI.Program.Core.Shared.Feedback.Warning;
 
@@ -16,7 +17,6 @@ namespace HCLI.Program.Core
 
             if (tokens.Count == 0) {
                 return null;
-                //throw new System.ArgumentException("Internal error: ParseException - Tokens count needs to be more than 0.");
             }
 
             string command = tokens[0];
@@ -43,6 +43,11 @@ namespace HCLI.Program.Core
             {
                 _reqArgsRemain = 0; // zzz -> a base command-okat át kellene írni ICommand-ra.
                 _optArgsRemain = 0;
+            }
+            else
+            {
+                ConsoleView.ThrowFeedback(new UknownCommand($"The command {command} is uknown."));
+                return null;
             }
 
             int returnReqArgs = _reqArgsRemain;
@@ -93,7 +98,7 @@ namespace HCLI.Program.Core
                     }
                     else if (!flaggedWarning)
                     {
-                        ConsoleView.ShowOutputOnConsole(new UnusedOptionalArgument());
+                        ConsoleView.ThrowFeedback(new UnusedOptionalArgument());
                     }
                 }
             }

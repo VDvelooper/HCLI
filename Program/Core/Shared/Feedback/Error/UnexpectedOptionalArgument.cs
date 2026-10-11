@@ -5,20 +5,18 @@ namespace HCLI.Program.Core.Shared.Feedback.Errors
     public class UnexpectedOptionalArgument : IFeedback
     {
         public FeedbackType ResultType { get; } = FeedbackType.Error;
-        public string FeedbackName { get; } = "Error.UnexpectedOptionalArgument";
-        public string? DebugMessage { get; }
-        public string? ConsoleOutput { get; }
+        public string FeedbackID { get; } = "Error.UnexpectedOptionalArgument";
+        public string? Description { get; }
+        public bool Silent { get; } = false;
+        public string? ConsoleOutputOverride { get; }
         public ConsoleOutputStyle ConsoleOutputStyle { get; private set; } = new(ConsoleColor.DarkRed, ConsoleColor.Black);
 
         public UnexpectedOptionalArgument() { }
-        public UnexpectedOptionalArgument(string? debugMessage)
+        public UnexpectedOptionalArgument(string? description = null, string? consoleOutputOverride = null, bool silent = false)
         {
-            DebugMessage = debugMessage;
-        }
-        public UnexpectedOptionalArgument(string? consoleOutput, string? debugMessage = null)
-        {
-            DebugMessage = debugMessage;
-            ConsoleOutput = consoleOutput;
+            Description = description;
+            ConsoleOutputOverride = consoleOutputOverride;
+            Silent = silent;
         }
     }
 }
