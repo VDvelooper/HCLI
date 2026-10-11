@@ -1,5 +1,7 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Errors;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -18,9 +20,12 @@ namespace HCLI.Program.Core.Commands
             Description = description;
         }
 
-        public void Execute(UserInput userInput)
+        public IFeedback Execute(UserInput userInput)
         {
-            Console.WriteLine(userInput.RequiredArgs[0]);
+            if (!userInput.ContainsRequiredArgs) 
+                return new MissingRequiredArgument();
+
+            return new ExpectedInput(userInput.RequiredArgs[0]);
         }
     }
 }

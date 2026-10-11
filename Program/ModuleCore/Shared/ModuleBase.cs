@@ -27,6 +27,7 @@ namespace HCLI.Program.ModuleCore.Shared
             ModuleCommand = moduleCommand;
 
             SubCommands = new List<ICommand>();
+
             BaseCommands = new Dictionary<string, Action<UserInput>>()
             {
                 {

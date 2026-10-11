@@ -1,5 +1,6 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -18,9 +19,10 @@ namespace HCLI.Program.Core.Commands
             Description = description;
         }
 
-        public void Execute(UserInput userInput)
+        public IFeedback Execute(UserInput userInput)
         {
             Runtime.SessionData.Running = false;
+            return new ExpectedInput();
         }
     }
 }

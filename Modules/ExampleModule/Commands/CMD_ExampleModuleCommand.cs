@@ -1,4 +1,6 @@
-﻿using HCLI.Program.Core.Shared;
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
 
 namespace HCLI.Modules.ExampleModule.Commands
 {
@@ -17,9 +19,10 @@ namespace HCLI.Modules.ExampleModule.Commands
             Description = description;
         }
 
-        public void Execute(UserInput userInput)
+        public IFeedback Execute(UserInput userInput)
         {
             Console.WriteLine($"This is a test command! Called from {userInput.Command}");
+            return new ExpectedInput();
         }
     }
 }

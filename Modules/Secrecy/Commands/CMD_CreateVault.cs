@@ -1,4 +1,8 @@
-﻿using HCLI.Program.Core.Shared;
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Error;
+using HCLI.Program.Core.Shared.Feedback.Errors;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
 using System.Text.Json;
 
 namespace HCLI.Modules.Secrecy.Commands
@@ -18,15 +22,17 @@ namespace HCLI.Modules.Secrecy.Commands
             Description = description;
         }
 
-        public void Execute(UserInput userInput)
+        public IFeedback Execute(UserInput userInput)
         {
             string savePath = "";
+            if (userInput.RequiredArgs.Count == 0)
+                return new MissingRequiredArgument();
 
-            if (userInput.RequiredArgs.Count == 0 || !Path.Exists(userInput.RequiredArgs[0]))
+            if (!Path.Exists(userInput.RequiredArgs[0]))
             {
                 Console.Write($"The path doesn't exists or you didn't set it.\n\n");
 
-                return;
+                return new FilePathNotFound();
 
                 /*Console.Write($"Do you wish to use the default path ({SecrecyModule.MAIN_DIRECTORY_PATH})? (Y/N)");
                 Console.Write("\nSecrecy > \n");
@@ -42,8 +48,6 @@ namespace HCLI.Modules.Secrecy.Commands
                 if (anwser.ToLower() == "y") savePath = SecrecyModule.MAIN_DIRECTORY_PATH;*/
             }
 
-            /*if (savePath == "")
-                savePath = userInput.RequiredArgs[0];*/
             savePath = userInput.RequiredArgs[0];
 
             // Setting the vault's default settings.
@@ -88,6 +92,8 @@ namespace HCLI.Modules.Secrecy.Commands
             File.WriteAllText(@$"{savePath}\vault.json", json);
 
             Console.Write($"\nVault has been created under the ownership's name: {ownerName}.\n");
+
+            return new ExpectedInput();
         }
     }
 }

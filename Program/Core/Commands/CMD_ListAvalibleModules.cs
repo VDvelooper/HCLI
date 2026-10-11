@@ -1,5 +1,6 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
 using HCLI.Program.ModuleCore;
 
 namespace HCLI.Program.Core.Commands
@@ -19,7 +20,7 @@ namespace HCLI.Program.Core.Commands
             Description = description;
         }
 
-        public void Execute(UserInput userInput)
+        public IFeedback Execute(UserInput userInput)
         {
             Console.WriteLine();
             foreach (ModuleData module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
@@ -27,6 +28,7 @@ namespace HCLI.Program.Core.Commands
                 Console.WriteLine(module.Name);
             }
             Console.WriteLine();
+            return new ExpectedInput();
         }
     }
 }

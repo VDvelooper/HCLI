@@ -8,7 +8,7 @@ namespace HCLI.Program.Core
         private static readonly Lexer _lexer = new Lexer();
         private static readonly FlagRegistry _flagRegistry = new FlagRegistry();
 
-        public static UserInput? Parse(string rawInput, bool root) // lehetne static?
+        public static UserInput? Parse(string rawInput, bool root)
         {
             List<string> tokens = _lexer.Tokenize(rawInput);
 
@@ -43,6 +43,8 @@ namespace HCLI.Program.Core
                 _optArgsRemain = 0;
             }
 
+            int returnReqArgs = _reqArgsRemain;
+            int returnOptArgs = _optArgsRemain;
 
             for (int i = 1; i < tokens.Count; i++)
             {
@@ -86,8 +88,13 @@ namespace HCLI.Program.Core
                }
            }
 
-            return new UserInput(command, reqArgs, optArgs, flags, rawInput);
+            return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
         }
+
+        /*public static string GetExpectedInput(string[] expectedInput, string prefix)
+        {
+            
+        }*/
 
         private static bool IsTokenFlag(string token) => token.StartsWith("--");
 

@@ -1,4 +1,5 @@
-﻿using HCLI.Program.Core.Shared;
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared;
 
 namespace HCLI.Program.Core
 {
@@ -8,17 +9,19 @@ namespace HCLI.Program.Core
         {
             if (userInput == null) return;
 
+            IFeedback feedback;
+
             if (Runtime.CommandRegistry.TryGetHCLICommand(userInput.Command, out var foundHCLICommand))
             {
                 if (foundHCLICommand != null)
-                    foundHCLICommand.Execute(userInput);
+                    feedback = foundHCLICommand.Execute(userInput);
                 else
                     throw new ArgumentNullException($"{userInput.Command} was not found as a HCLI command.");
             }
             else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput.Command, out var foundModuleCommand) && foundModuleCommand != null)
             {
                 if (foundModuleCommand != null)
-                    foundModuleCommand.Execute(userInput);
+                    feedback = foundModuleCommand.Execute(userInput);
                 else
                     throw new ArgumentNullException($"{userInput.Command} was not found as a module command.");
             }
