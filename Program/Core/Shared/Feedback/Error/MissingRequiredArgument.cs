@@ -8,6 +8,7 @@ namespace HCLI.Program.Core.Shared.Feedback.Errors
         public string FeedbackName { get; } = "Error.MissingRequiredArgument";
         public string? DebugMessage { get; }
         public string? ConsoleOutput { get; }
+        public ConsoleOutputStyle ConsoleOutputStyle { get; private set; } = new(ConsoleColor.DarkRed, ConsoleColor.Black);
 
         public MissingRequiredArgument() { }
         public MissingRequiredArgument(string? debugMessage)

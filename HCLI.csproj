@@ -7,8 +7,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Program\Core\Shared\Feedback\Warning\" />
-  </ItemGroup>
-
 </Project>

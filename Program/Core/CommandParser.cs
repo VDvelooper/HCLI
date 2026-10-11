@@ -1,5 +1,7 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Shared.Feedback.Errors;
+using HCLI.Program.Core.Shared.Feedback.Warning;
 
 namespace HCLI.Program.Core
 {
@@ -45,56 +47,60 @@ namespace HCLI.Program.Core
 
             int returnReqArgs = _reqArgsRemain;
             int returnOptArgs = _optArgsRemain;
+            bool flaggedWarning = false;
 
             for (int i = 1; i < tokens.Count; i++)
             {
-               string token = tokens[i];
-
-               if (IsTokenFlag(token))
-               {
-                   if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag))
-                       throw new System.ArgumentException($"Unknown flag. token: {token}");
-
-                   if (foundFlag == null)
-                       throw new System.ArgumentException($"Flag was not found. token: {token}");
-
-                   ParsedFlag parsedFlag = new ParsedFlag(foundFlag);
-
-                   List<string>? values = parsedFlag.FlagDefinition!.RequiresValue
-                       ? GetFlagValues(tokens, ref i, foundFlag)
-                       : null;
-
-                   if (values != null)
-                   {
-                       parsedFlag.Values.AddRange(values);
-                   }
-
-                   flags.Add(parsedFlag);
-               }
-               else
-               { // parsing the arguments
-                   string arg = tokens[i];
-
-                   if (_reqArgsRemain > 0)
-                   {
-                       reqArgs.Add(arg);
-                       _reqArgsRemain--;
-                   }
-                   else if (_optArgsRemain > 0)
-                   {
-                       optArgs.Add(arg);
-                       _optArgsRemain--;
-                   }
-               }
-           }
+                string token = tokens[i];
+                
+                if (IsTokenFlag(token))
+                {
+                    if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag))
+                        throw new System.ArgumentException($"Unknown flag. token: {token}");
+                
+                    if (foundFlag == null)
+                        throw new System.ArgumentException($"Flag was not found. token: {token}");
+                
+                    ParsedFlag parsedFlag = new ParsedFlag(foundFlag);
+                
+                    List<string>? values = parsedFlag.FlagDefinition!.RequiresValue
+                        ? GetFlagValues(tokens, ref i, foundFlag)
+                        : null;
+                
+                    if (values != null)
+                    {
+                        parsedFlag.Values.AddRange(values);
+                    }
+                
+                    flags.Add(parsedFlag);
+                }
+                else
+                {
+                    // parsing the arguments
+                    string arg = tokens[i];
+                
+                    if (_reqArgsRemain > 0)
+                    {
+                         reqArgs.Add(arg);
+                         _reqArgsRemain--;
+                         continue;
+                    }
+                    else if (_optArgsRemain > 0)
+                    {
+                        optArgs.Add(arg);
+                        _optArgsRemain--;
+                        continue;
+                    }
+                    else if (!flaggedWarning)
+                    {
+                        ConsoleView.ShowOutputOnConsole(new UnusedOptionalArgument());
+                    }
+                }
+            }
 
             return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
         }
 
-        /*public static string GetExpectedInput(string[] expectedInput, string prefix)
-        {
-            
-        }*/
 
         private static bool IsTokenFlag(string token) => token.StartsWith("--");
 

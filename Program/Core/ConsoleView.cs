@@ -4,38 +4,67 @@ namespace HCLI.Program.Core
 {
     public class ConsoleView
     {
-        /*private const ConsoleColor DEFAULT_FOREGROUND_COLOR = ConsoleColor.Black;
-        private const ConsoleColor DEFAULT_BACKGROUND_COLOR = ConsoleColor.White;*/
-
-        public void ShowOutputOnConsole(IFeedback feedback)
+        public static void ShowOutputOnConsole(IFeedback feedback)
         {
             switch (feedback.ResultType)
             {
                 case Shared.Feedback.FeedbackType.Expected:
+
+                    if (feedback.DebugMessage != null)
+                        Debug($"{feedback.FeedbackName}: {feedback.DebugMessage}");
                     if (feedback.ConsoleOutput != null)
-                        Message(feedback.ConsoleOutput);
+                        Message(feedback.ConsoleOutput, feedback.ConsoleOutputStyle);
+                    break;
+
+
+                case Shared.Feedback.FeedbackType.Warning:
+
+                    if (feedback.DebugMessage != null)
+                        Debug($"{feedback.FeedbackName}: {feedback.DebugMessage}");
+                    else
+                        Warn($"{feedback.FeedbackName}");
+                    break;
+
+
+                case Shared.Feedback.FeedbackType.Error:
+
+                    if (feedback.DebugMessage != null)
+                        Debug($"{feedback.FeedbackName}: {feedback.DebugMessage}");
+                    else
+                        Error($"{feedback.FeedbackName}");
                     break;
             }
         }
 
-        
-        
-        public void Message(string message)
+
+
+        public static void Message(string message, ConsoleOutputStyle? outputStyle)
         {
-            Console.ResetColor();
-            Console.WriteLine(message);
-        }
-        public void Warn(string message)
-        {
-            Console.BackgroundColor = ConsoleColor.DarkYellow;
-            Console.ForegroundColor = ConsoleColor.White;
+            if (outputStyle != null) {
+                Console.ForegroundColor = outputStyle.ForegroundColor;
+                Console.BackgroundColor = outputStyle.BackgroundColor;
+            }
             Console.WriteLine(message);
             Console.ResetColor();
         }
-        public void Error(string message)
+        public static void Debug(string message)
         {
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+        public static void Warn(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+        public static void Error(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine(message);
             Console.ResetColor();
         }

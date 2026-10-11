@@ -8,5 +8,6 @@ namespace HCLI.Program.Core.Abstractions
         public string FeedbackName { get; }
         public string? DebugMessage { get; }
         public string? ConsoleOutput { get; }
+        public ConsoleOutputStyle ConsoleOutputStyle { get; }
     }
 }

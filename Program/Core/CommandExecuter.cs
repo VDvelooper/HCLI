@@ -11,30 +11,32 @@ namespace HCLI.Program.Core
 
             IFeedback feedback;
 
-            if (Runtime.CommandRegistry.TryGetHCLICommand(userInput.Command, out var foundHCLICommand))
+            if (Runtime.CommandRegistry.TryGetHCLICommand(userInput.Command, out var foundHCLICommand)
+                &&
+                foundHCLICommand != null
+            )
             {
-                if (foundHCLICommand != null)
-                    feedback = foundHCLICommand.Execute(userInput);
-                else
-                    throw new ArgumentNullException($"{userInput.Command} was not found as a HCLI command.");
+                feedback = foundHCLICommand.Execute(userInput);
+                ConsoleView.ShowOutputOnConsole(feedback);
             }
-            else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput.Command, out var foundModuleCommand) && foundModuleCommand != null)
+
+            else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput.Command, out var foundModuleCommand) 
+                && foundModuleCommand != null
+            )
             {
-                if (foundModuleCommand != null)
-                    feedback = foundModuleCommand.Execute(userInput);
-                else
-                    throw new ArgumentNullException($"{userInput.Command} was not found as a module command.");
+                feedback = foundModuleCommand.Execute(userInput);
+                ConsoleView.ShowOutputOnConsole(feedback);
             }
+
             // this means, that if it is a base command for example: exit or help
-            else if (Runtime.ModuleRegistry.TryGetBaseCommand(userInput.Command, out Action<UserInput>? found))
+            else if (Runtime.ModuleRegistry.TryGetBaseCommand(userInput.Command, out Action<UserInput>? found)
+                && found != null
+            )
             {
-                if (found != null) 
-                    found.Invoke(userInput);
-                else
-                    throw new ArgumentNullException($"{userInput.Command} was not found as a base command.");
+                found.Invoke(userInput);
             }
             else
-                Console.WriteLine($"Command {userInput.Command} is unknown.");
+                ConsoleView.Error($"Command {userInput.Command} is unknown.");
 
             if (userInput.TryGetFlag(FlagID.Debug, out _))
             {

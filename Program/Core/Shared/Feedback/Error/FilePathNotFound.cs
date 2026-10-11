@@ -8,6 +8,7 @@ namespace HCLI.Program.Core.Shared.Feedback.Error
         public string FeedbackName { get; } = "Error.FilePathNotFound";
         public string? DebugMessage { get; }
         public string? ConsoleOutput { get; }
+        public ConsoleOutputStyle ConsoleOutputStyle { get; private set; } = new(ConsoleColor.DarkRed, ConsoleColor.Black);
 
         public FilePathNotFound() { }
         public FilePathNotFound(string? debugMessage)

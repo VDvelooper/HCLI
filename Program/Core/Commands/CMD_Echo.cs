@@ -2,6 +2,7 @@
 using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Errors;
 using HCLI.Program.Core.Shared.Feedback.Expecteds;
+using HCLI.Program.Core.Shared.Feedback.Warning;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -22,9 +23,6 @@ namespace HCLI.Program.Core.Commands
 
         public IFeedback Execute(UserInput userInput)
         {
-            if (!userInput.ContainsRequiredArgs) 
-                return new MissingRequiredArgument();
-
             return new ExpectedInput(userInput.RequiredArgs[0]);
         }
     }
