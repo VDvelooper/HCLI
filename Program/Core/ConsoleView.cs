@@ -45,7 +45,7 @@ namespace HCLI.Program.Core
 
 
 
-        public static void Message(string message, ConsoleOutputStyle? outputStyle)
+        public static void Message(string message, ConsoleOutputStyle? outputStyle = null)
         {
             if (outputStyle != null) {
                 Console.ForegroundColor = outputStyle.ForegroundColor;

@@ -1,4 +1,5 @@
-﻿using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Core;
+using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.Core.Shared.Feedback.Errors;
@@ -27,6 +28,8 @@ namespace HCLI.Modules.Secrecy.Commands
             string savePath = "";
             if (userInput.RequiredArgs.Count == 0)
                 return new MissingRequiredArgument();
+
+            IFeedback feedback;
 
             if (!Path.Exists(userInput.RequiredArgs[0]))
             {
@@ -66,13 +69,15 @@ namespace HCLI.Modules.Secrecy.Commands
 
             if (masterKeyTest != masterKey)
             {
-                Console.Write($"Incorrect master password! Do you wish to create a new one? (Y/N)");
+                ConsoleView.ThrowFeedback(new UnkownAnwser("Incorrect master password."));
+                ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
                 Console.Write("\nSecrecy > ");
                 string anwser = Console.ReadLine();
 
                 while (anwser.ToLower() != "y" && anwser.ToLower() != "n")
                 {
-                    Console.Write($"Unknown anwser! Do you wish to create a new one? (Y/N)");
+                    ConsoleView.ThrowFeedback(new UnkownAnwser("Unknown anwser. Possible anwsers: Y/N"));
+                    ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
                     Console.Write("\nSecrecy > ");
                     anwser = Console.ReadLine();
                 }

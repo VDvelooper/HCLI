@@ -50,10 +50,7 @@ namespace HCLI.Modules.Secrecy
 
                 UserInput? newUserInput = CommandParser.Parse(newRawInput, false);
 
-                if (newUserInput != null)
-                    CommandExecuter.ExecuteCommand(userInput);
-                else
-                    throw new ArgumentNullException($"Parsing returned no value.");
+                CommandExecuter.ExecuteCommand(userInput);
             }
 
             SaveConfig();

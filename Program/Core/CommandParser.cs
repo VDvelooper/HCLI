@@ -1,7 +1,6 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Error;
-using HCLI.Program.Core.Shared.Feedback.Errors;
 using HCLI.Program.Core.Shared.Feedback.Warning;
 
 namespace HCLI.Program.Core
@@ -27,19 +26,19 @@ namespace HCLI.Program.Core
             int _reqArgsRemain = 0;
             int _optArgsRemain = 0;
 
-            if (root && Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
+            if (/*root && */Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
             {
                 _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
                 _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
             }
-            else if (!root && Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
+            else if (/*!root && */Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
             {
                 if (foundCommand == null) throw new System.ArgumentException($"Command was not found. command: {command}"); 
 
                 _reqArgsRemain = foundCommand.RequiredArgCount;
                 _optArgsRemain = foundCommand.OptionalArgCount;
             }
-            else if (!root && Runtime.ModuleRegistry.TryGetBaseCommand(command, out Action<UserInput>? found))
+            else if (/*!root && */Runtime.ModuleRegistry.TryGetBaseCommand(command, out Action<UserInput>? found))
             {
                 _reqArgsRemain = 0; // zzz -> a base command-okat át kellene írni ICommand-ra.
                 _optArgsRemain = 0;
