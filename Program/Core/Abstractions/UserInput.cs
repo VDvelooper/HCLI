@@ -1,6 +1,7 @@
-﻿using HCLI.Program.ModuleCore.Shared;
+﻿using HCLI.Program.Core.Shared;
+using HCLI.Program.ModuleCore.Shared;
 
-namespace HCLI.Program.Core.Shared
+namespace HCLI.Program.Core.Abstractions
 {
     public class UserInput
     {

@@ -9,14 +9,13 @@ namespace HCLI.Program
         public FlagRegistry()
         {
 
-            FlagDefinition flag_debug = new FlagDefinition("--debug", "Debug", Core.FlagID.Debug);
+            FlagDefinition flag_debug = new FlagDefinition("--debug", "Debug", FlagID.Debug);
 
             Flags = new()
             {
                 { flag_debug }
             };
         }
-
 
         public bool TryGet(string syntax, out FlagDefinition? found)
         {

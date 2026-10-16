@@ -1,37 +1,27 @@
 ﻿using HCLI.Modules.ExampleModule;
 using HCLI.Modules.Secrecy;
-using HCLI.Program.Core.Shared;
-
-//using HCLI.Program.Base;
-using HCLI.Program.ModuleCore;
+using HCLI.Program.Core.Abstractions;
 using HCLI.Program.ModuleCore.Shared;
-using System.Security.Cryptography.X509Certificates;
 
 namespace HCLI.Program
 {
     public class ModuleRegistry
     {
-        // -- Modules -- //
-
         public List<ModuleBase> AVALIBLE_MODULES; // szeretném hogy lehessen külön kiválasztani, hogy milyen modulok legyenek betöltve (1)
-
-
 
         public ModuleRegistry()
         {
-
             // -- base object initialization -- //    <- (1) Ezeket csak akkor inicializálnánk, ha a felhasználó kiválasztja (mondjuk külső forrásból) a modult betöltésre
             CLASS_EXAMPLE = new ExampleModule(true);
             CLASS_SECRECY = new SecrecyModule(true);
             
-
             AVALIBLE_MODULES = new();
 
             AVALIBLE_MODULES.Add(CLASS_SECRECY); // (1) Akkor adjuk hozzá amikor a felhasználó kijelöli azt implementációra
         }
 
 
-        public bool TryExecutingCommandFromModule(Core.Shared.UserInput userInput)
+        public bool TryExecutingCommandFromModule(UserInput userInput)
         {
             foreach (ModuleBase module in AVALIBLE_MODULES)
             {
@@ -73,7 +63,7 @@ namespace HCLI.Program
 
             return found != null;
         }
-
+        
         // -- Source Sets -- //
 
         private readonly ExampleModule CLASS_EXAMPLE;

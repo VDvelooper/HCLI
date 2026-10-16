@@ -1,13 +1,18 @@
-﻿using HCLI.Program.Core.Shared;
+﻿using HCLI.Program.Core.Shared.Feedback.Expecteds;
 
 namespace HCLI.Program.Core.Abstractions
 {
     public interface ICommand
     {
-        public string Syntax { get; }
-        public int RequiredArgCount { get; }
-        public int OptionalArgCount { get; }
-        public string Description { get; }
-        public IFeedback Execute(UserInput userInput);
+        abstract string Syntax { get; }
+        abstract int RequiredArgCount { get; }
+        abstract int OptionalArgCount { get; }
+        abstract string Description { get; }
+        abstract IFeedback? Run(UserInput userInput);
+
+        IFeedback Execute(UserInput userInput) 
+        { 
+            return Run(userInput) ?? new ExpectedInput(); 
+        }
     }
 }

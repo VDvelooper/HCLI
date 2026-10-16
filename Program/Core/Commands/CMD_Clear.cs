@@ -1,10 +1,9 @@
 ﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Expecteds;
 
 namespace HCLI.Program.Core.Commands
 {
-    public class CMD_Clear : ICommand
+    internal class CMD_Clear : ICommand
     {
         public string Syntax { get; }
         public int RequiredArgCount { get; }
@@ -19,10 +18,10 @@ namespace HCLI.Program.Core.Commands
             Description = description;
         }
 
-        public IFeedback Execute(UserInput userInput)
+        public IFeedback? Run(UserInput userInput)
         {
             Console.Clear();
-            return new ExpectedInput();
+            return null;
         }
     }
 }

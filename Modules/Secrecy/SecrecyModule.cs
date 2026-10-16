@@ -1,6 +1,7 @@
 ﻿using HCLI.Modules.Secrecy.Commands;
 using HCLI.Program.Core;
-using HCLI.Program.Core.Shared;
+using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.ModuleCore.Shared;
 using System.Text.Json;
 
@@ -8,8 +9,6 @@ namespace HCLI.Modules.Secrecy
 {
     public class SecrecyModule : ModuleBase
     {
-
-
         public bool SETUP_COMPLETE = false;
         public string USERNAME = "";
 
@@ -25,12 +24,6 @@ namespace HCLI.Modules.Secrecy
 
 
             SubCommands.Add(cmd_createVault);
-
-
-            // depricated *1
-            /*BaseCommands.Add("cv", args => CreateSinglePathVault(args));
-            BaseCommands.Add("setup", args => InintialSetUp());
-            BaseCommands.Add("test", args => TestCommand(args));*/
         }
 
 
@@ -45,8 +38,7 @@ namespace HCLI.Modules.Secrecy
 
             while (IsSeparateModeRunning)
             {
-                Console.Write("Secrecy > ");
-                string newRawInput = Console.ReadLine();
+                string newRawInput = ConsoleView.ReadUserInput(ModuleName);
 
                 UserInput? newUserInput = CommandParser.Parse(newRawInput, false);
 
@@ -66,8 +58,8 @@ namespace HCLI.Modules.Secrecy
 
                 if (!Path.Exists(MAIN_DIRECTORY_PATH))
                 {
-                    Console.Write($"\nWelcome to Secrecy! It seems like you haven't set up the module yet!");
-                    Console.Write($"\nThe setup will be at this location: {MAIN_DIRECTORY_PATH}");
+                    ConsoleView.Message($"\nWelcome to Secrecy! It seems like you haven't set up the module yet!", false);
+                    ConsoleView.Message($"The setup will be at this location: {MAIN_DIRECTORY_PATH}", false);
                     Directory.CreateDirectory(MAIN_DIRECTORY_PATH);
                     Directory.CreateDirectory($"{MAIN_DIRECTORY_PATH}\\Data");
                 }
@@ -79,11 +71,10 @@ namespace HCLI.Modules.Secrecy
                     //zzz
                 }
 
-                Console.Write("\nSet your username: ");
-                Console.Write($"\nSecrecy > ");
-                string userName = Console.ReadLine();
+                ConsoleView.Message("\nSet your username: ", false);
+                string userName = ConsoleView.ReadUserInput(ModuleName);
 
-                Console.WriteLine($"\nSetup complete {userName}! You can find the config file here: {CONFIG_ABSOLUTE_PATH}\n\n");
+                ConsoleView.Message($"\nSetup complete {userName}! You can find the config file here: {CONFIG_ABSOLUTE_PATH}\n", true);
 
                 CONFIG_ABSOLUTE_PATH = CreateConfigFile(userName, MAIN_DIRECTORY_PATH, new List<string>());
                 USERNAME = userName;
@@ -97,7 +88,10 @@ namespace HCLI.Modules.Secrecy
             if (!Path.Exists(CONFIG_ABSOLUTE_PATH)) return false;
 
             string json = File.ReadAllText(CONFIG_ABSOLUTE_PATH);
-            ConfigData configData = JsonSerializer.Deserialize<ConfigData>(json);
+            ConfigData? configData = JsonSerializer.Deserialize<ConfigData>(json);
+
+            if (configData == null)
+                return false;
 
             SETUP_COMPLETE = configData.SetupComplete;
             CONFIG_ABSOLUTE_PATH = configData.configAbsolutePath;
@@ -108,11 +102,14 @@ namespace HCLI.Modules.Secrecy
 
         private void SaveConfig()
         {
-            if (!Path.Exists(CONFIG_ABSOLUTE_PATH)) return;
+            if (!Path.Exists(CONFIG_ABSOLUTE_PATH)) 
+                return;
 
             string json = File.ReadAllText(CONFIG_ABSOLUTE_PATH);
-            ConfigData configData = JsonSerializer.Deserialize<ConfigData>(json);
+            ConfigData? configData = JsonSerializer.Deserialize<ConfigData>(json);
 
+            if (configData == null) 
+                return;
 
             configData.SetupComplete = SETUP_COMPLETE;
             configData.configAbsolutePath = CONFIG_ABSOLUTE_PATH;
@@ -126,7 +123,7 @@ namespace HCLI.Modules.Secrecy
 
         private void ManageAccount()
         {
-            UserData userData;
+            UserData? userData;
 
             if (!Path.Exists(USERS_ABSOLUTE_PATH))
             {
@@ -143,17 +140,22 @@ namespace HCLI.Modules.Secrecy
                 string fileContent = File.ReadAllText(USERS_ABSOLUTE_PATH);
                 userData = JsonSerializer.Deserialize<UserData>(fileContent);
 
+                if (userData == null)
+                {
+                    ConsoleView.PresentFeedback(new InternalNullExeption($"Null encounter during loading user data. (Secrecy)"));
+                    return;
+                }
+
                 if (fileContent != "")
                 {
-                    Console.WriteLine("Log-in or create a new account. Commands: login / new\n");
+                    ConsoleView.Message("Log-in or create a new account. Commands: login / new");
 
-                    Console.Write("Secrecy > ");
-                    string inputAnwser = Console.ReadLine();
+                    string inputAnwser = ConsoleView.ReadUserInput(ModuleName);
+
                     while (inputAnwser != "login" || inputAnwser != "new")
                     {
-                        Console.WriteLine("Unknown command. Try again.");
-                        Console.Write("Secrecy > ");
-                        inputAnwser = Console.ReadLine();
+                        ConsoleView.PresentFeedback(new UnkownAnwser(null, "Unknown command. Try again."));
+                        inputAnwser = ConsoleView.ReadUserInput(ModuleName);
                     }
 
                     if (inputAnwser == "login")
@@ -175,26 +177,23 @@ namespace HCLI.Modules.Secrecy
         private void Login(UserData userData)
         {
 
-            Console.WriteLine("Existing accounts:\n");
+            ConsoleView.Message("Existing accounts:\n");
 
             foreach (KeyValuePair<string, string> pair in userData.UserDataDictionary)
             {
-                Console.WriteLine(pair.Key);
+                ConsoleView.Message(pair.Key);
             }
 
 
-            Console.WriteLine("\nWrite the username to proceed to logining into that account:");
-            Console.Write("Secrecy > ");
+            ConsoleView.Message("\nWrite the username to proceed to logining into that account:");
+            string userInput = ConsoleView.ReadUserInput(ModuleName);
 
-
-            string userInput = Console.ReadLine();
             while (!userData.UserDataDictionary.ContainsKey(userInput) || userInput != "new")
             {
-                Console.WriteLine("That's not an existing account. Try again.");
-                Console.WriteLine("If you wish to create a new account then type \'new\'.");
-                Console.Write("Secrecy > ");
+                ConsoleView.Message("That's not an existing account. Try again.");
+                ConsoleView.Message("If you wish to create a new account then type \'new\'.");
 
-                userInput = Console.ReadLine();
+                userInput = ConsoleView.ReadUserInput(ModuleName);
             }
 
             if (userInput == "new") CreateUser(ref userData);
@@ -202,16 +201,14 @@ namespace HCLI.Modules.Secrecy
             {
                 string username = userInput;
 
-                Console.WriteLine("\nPassword:");
-                Console.Write("Secrecy > ");
-                userInput = Console.ReadLine();
+                ConsoleView.Message("\nPassword:");
+                userInput = ConsoleView.ReadUserInput(ModuleName);
 
                 // password check
                 while (userInput != userData.UserDataDictionary[username])
                 {
-                    Console.WriteLine("\nWrong password. Try again:");
-                    Console.Write("Secrecy > ");
-                    userInput = Console.ReadLine();
+                    ConsoleView.Message("\nWrong password. Try again:");
+                    userInput = ConsoleView.ReadUserInput(ModuleName);
                 }
 
                 _loggedInUserName = username;
@@ -222,20 +219,17 @@ namespace HCLI.Modules.Secrecy
 
         private void CreateUser(ref UserData userData)
         {
-            Console.WriteLine("Set your username:");
-            Console.Write("Secrecy > ");
-            string username = Console.ReadLine();
+            ConsoleView.Message("Set your username:");
+            string username = ConsoleView.ReadUserInput(ModuleName);
 
             while (userData.UserDataDictionary.ContainsKey(username))
             {
-                Console.WriteLine("Set your username:");
-                Console.Write("Secrecy > ");
-                username = Console.ReadLine();
+                ConsoleView.Message("Set your username:");
+                username = ConsoleView.ReadUserInput(ModuleName);
             }
 
-            Console.WriteLine("Set your password:");
-            Console.Write("Secrecy > ");
-            string password = Console.ReadLine();
+            ConsoleView.Message("Set your password:");
+            string password = ConsoleView.ReadUserInput(ModuleName);
 
             userData.AddUser(username, password);
 
@@ -251,7 +245,7 @@ namespace HCLI.Modules.Secrecy
             ConfigData configData = new ConfigData();
 
             configData.Username = userName;
-            configData.mainDirectoryPath = mainDirectoryPath;
+            if (mainDirectoryPath != null) configData.mainDirectoryPath = mainDirectoryPath;
             configData.configAbsolutePath = @$"{MAIN_DIRECTORY_PATH}\config.hclidata";
             configData.SetupComplete = true;
             configData.VaultPaths = vaultPaths;
@@ -265,23 +259,21 @@ namespace HCLI.Modules.Secrecy
             return configAbsolutePath;
         }
 
-        public void CreateSinglePathVault(ModuleModeUserInput userInput)
+        public void CreateSinglePathVault(UserInput userInput)
         {
-            List<string> convertedArgs = userInput.Args.ToList();
+            List<string> convertedArgs = userInput.RequiredArgs.ToList();
 
             if (convertedArgs.Count == 0 || !Path.Exists(convertedArgs[0]))
             {
-                Console.Write($"The path doesn't exists or you didn't set it.\n\n");
+                ConsoleView.Message($"The path doesn't exists or you didn't set it.\n");
 
-                Console.Write($"Do you wish to use the default path ({MAIN_DIRECTORY_PATH})? (Y/N)");
-                Console.Write("\nSecrecy > \n");
-                string anwser = Console.ReadLine();
+                ConsoleView.Message($"Do you wish to use the default path ({MAIN_DIRECTORY_PATH})? (Y/N)");
+                string anwser = ConsoleView.ReadUserInput(ModuleName);
 
                 while (anwser.ToLower() != "y" && anwser.ToLower() != "n")
                 {
-                    Console.Write($"Unknown anwser! Do you wish to use the default path ({MAIN_DIRECTORY_PATH})? (Y/N)");
-                    Console.Write("\nSecrecy > \n");
-                    anwser = Console.ReadLine();
+                    ConsoleView.Message($"Unknown anwser! Do you wish to use the default path ({MAIN_DIRECTORY_PATH})? (Y/N)");
+                    anwser = ConsoleView.ReadUserInput(ModuleName);
                 }
 
                 if (anwser.ToLower() == "n") return;
@@ -302,36 +294,30 @@ namespace HCLI.Modules.Secrecy
 
             // Setting the vault's default settings.
 
-            Console.Write($"Give the vault's owner's name: ");
-            Console.Write("\nSecrecy > ");
-            string ownerName = Console.ReadLine();
+            ConsoleView.Message($"Give the vault's owner's name: ");
+            string ownerName = ConsoleView.ReadUserInput(ModuleName);
 
-            Console.Write($"Set a master password for the vault. You will need this to access your vault.");
-            Console.Write("\nSecrecy > ");
-            string masterKey = Console.ReadLine();
+            ConsoleView.Message($"Set a master password for the vault. You will need this to access your vault.");
+            string masterKey = ConsoleView.ReadUserInput(ModuleName);
 
-            Console.Write($"Write your master password.");
-            Console.Write("\nSecrecy > ");
-            string masterKeyTest = Console.ReadLine();
+            ConsoleView.Message($"Write your master password.");
+            string masterKeyTest = ConsoleView.ReadUserInput(ModuleName);
 
             if (masterKeyTest != masterKey)
             {
-                Console.Write($"Incorrect master password! Do you wish to create a new one? (Y/N)");
-                Console.Write("\nSecrecy > ");
-                string anwser = Console.ReadLine();
+                ConsoleView.Message($"Incorrect master password! Do you wish to create a new one? (Y/N)");
+                string anwser = ConsoleView.ReadUserInput(ModuleName);
 
                 while (anwser.ToLower() != "y" && anwser.ToLower() != "n")
                 {
-                    Console.Write($"Unknown anwser! Do you wish to create a new one? (Y/N)");
-                    Console.Write("\nSecrecy > ");
-                    anwser = Console.ReadLine();
+                    ConsoleView.Message($"Unknown anwser! Do you wish to create a new one? (Y/N)");
+                    anwser = ConsoleView.ReadUserInput(ModuleName);
                 }
 
                 if (anwser.ToLower() == "y")
                 {
-                    Console.Write($"Set a new master password for the vault. YOU WON'T BE ABLE TO REWRITE IT ANYMORE");
-                    Console.Write("\nSecrecy > ");
-                    masterKey = Console.ReadLine();
+                    ConsoleView.Message($"Set a new master password for the vault. YOU WON'T BE ABLE TO REWRITE IT ANYMORE");
+                    masterKey = ConsoleView.ReadUserInput(ModuleName);
                 }
             }
 
@@ -341,12 +327,12 @@ namespace HCLI.Modules.Secrecy
             string json = JsonSerializer.Serialize(newVault);
             File.WriteAllText(@$"{savePath}\vault.json", json);
 
-            Console.Write($"\nVault has been created under the ownership's name: {ownerName}.\n");
+            ConsoleView.Message($"\nVault has been created under the ownership's name: {ownerName}.");
         }
 
-        private void TestCommand(ModuleModeUserInput _)
+        private void TestCommand(UserInput _)
         {
-            Console.WriteLine("\nSecrecy > Test success!\n");
+            ConsoleView.Message("\nSecrecy > Test success!\n");
         }
 
         private string _loggedInUserName;

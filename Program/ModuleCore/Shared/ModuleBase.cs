@@ -1,26 +1,34 @@
-﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
+﻿using HCLI.Program.Core;
+using HCLI.Program.Core.Abstractions;
 
 namespace HCLI.Program.ModuleCore.Shared
 {
-    public class ModuleBase
+    public class    ModuleBase
     {
         public string ModuleName { get; private set; }
         public string ModuleCommand { get; private set; }
-        public Dictionary<string, Action<UserInput>> BaseCommands { get; set; }
+        public Dictionary<string, Action<UserInput>> BaseCommands { get; private set; }
         public List<ICommand> SubCommands { get; private set; }
 
+        private bool _isSeparateMode;
+        protected bool _isSeparateModeRunning;
+        public bool IsSeparateMode
+        {
+            get { return _isSeparateMode; }
+            internal set { _isSeparateMode = value; }
+        }
+        public bool IsSeparateModeRunning
+        {
+            get { return _isSeparateModeRunning; }
+            protected set { _isSeparateModeRunning = value; }
+        }
 
         public static string MODULE_DATA_DIR_PATH = @$"{Runtime.ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
 
-        // Instance
-
-        protected bool IsSeparateMode;
-        protected bool IsSeparateModeRunning;
-
+        
         public ModuleBase(string moduleName, string moduleCommand, bool separateMode)
         {
-            IsSeparateMode = separateMode;
+            _isSeparateMode = separateMode;
             IsSeparateModeRunning = false;
 
             ModuleName = moduleName;
@@ -48,22 +56,20 @@ namespace HCLI.Program.ModuleCore.Shared
                 }
             };
 
-            Console.WriteLine($"MODULE_DATA_DIR_PATH:{MODULE_DATA_DIR_PATH}");
-
             if (!Path.Exists(MODULE_DATA_DIR_PATH))
                 Directory.CreateDirectory(MODULE_DATA_DIR_PATH);
-            
         }
 
         public virtual void ModuleExecute(UserInput userInput) { }
 
         private void ExitModuleCommand(UserInput _)
         {
-            if (!IsSeparateMode) return;
+            if (!_isSeparateMode) return;
             if (!IsSeparateModeRunning) return;
 
             IsSeparateModeRunning = false;
         }
+
         private void HelpModuleCommand(UserInput _)
         {
             List<string> commandList = new List<string>();
@@ -82,9 +88,10 @@ namespace HCLI.Program.ModuleCore.Shared
 
             Console.WriteLine();
         }
+
         private void PrintDirectory(UserInput _)
         {
-            Console.WriteLine($"Module data directory: {MODULE_DATA_DIR_PATH}");
+            ConsoleView.Message($"Module data directory: {MODULE_DATA_DIR_PATH}");
         }
     }
 }

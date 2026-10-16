@@ -1,10 +1,9 @@
 ﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Expecteds;
 
 namespace HCLI.Program.Core.Commands
 {
-    public class CMD_Exit : ICommand
+    internal class CMD_Exit : ICommand
     {
         public string Syntax { get; }
         public int RequiredArgCount { get; }
@@ -19,10 +18,10 @@ namespace HCLI.Program.Core.Commands
             Description = description;
         }
 
-        public IFeedback Execute(UserInput userInput)
+        public IFeedback? Run(UserInput userInput)
         {
             Runtime.SessionData.Running = false;
-            return new ExpectedInput();
+            return null;
         }
     }
 }

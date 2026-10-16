@@ -1,6 +1,5 @@
 ﻿using HCLI.Program.Core;
 using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.Core.Shared.Feedback.Errors;
 using HCLI.Program.Core.Shared.Feedback.Expecteds;
@@ -23,70 +22,50 @@ namespace HCLI.Modules.Secrecy.Commands
             Description = description;
         }
 
-        public IFeedback Execute(UserInput userInput)
+        public IFeedback? Run(UserInput userInput)
         {
             string savePath = "";
             if (userInput.RequiredArgs.Count == 0)
                 return new MissingRequiredArgument();
-
-            IFeedback feedback;
 
             if (!Path.Exists(userInput.RequiredArgs[0]))
             {
                 Console.Write($"The path doesn't exists or you didn't set it.\n\n");
 
                 return new FilePathNotFound();
-
-                /*Console.Write($"Do you wish to use the default path ({SecrecyModule.MAIN_DIRECTORY_PATH})? (Y/N)");
-                Console.Write("\nSecrecy > \n");
-                string anwser = Console.ReadLine();
-
-                while (anwser.ToLower() != "y" && anwser.ToLower() != "n")
-                {
-                    Console.Write($"Unknown anwser! Do you wish to use the default path ({SecrecyModule.MAIN_DIRECTORY_PATH})? (Y/N)");
-                    Console.Write("\nSecrecy > \n");
-                    anwser = Console.ReadLine();
-                }
-
-                if (anwser.ToLower() == "y") savePath = SecrecyModule.MAIN_DIRECTORY_PATH;*/
             }
 
             savePath = userInput.RequiredArgs[0];
 
             // Setting the vault's default settings.
 
-            Console.Write($"Give the vault's owner's name: ");
-            Console.Write("\nSecrecy > ");
-            string ownerName = Console.ReadLine();
+            ConsoleView.Message($"Give the vault's owner's name: ");
+            string ownerName = ConsoleView.ReadUserInput("Secrecy");
 
-            Console.Write($"Set a master password for the vault. You will need this to access your vault.");
-            Console.Write("\nSecrecy > ");
-            string masterKey = Console.ReadLine();
+            ConsoleView.Message($"Set a master password for the vault. You will need this to access your vault.");
+            string masterKey = ConsoleView.ReadUserInput("Secrecy");
 
-            Console.Write($"Write your master password.");
-            Console.Write("\nSecrecy > ");
-            string masterKeyTest = Console.ReadLine();
+            ConsoleView.Message($"Write your master password.");
+            string masterKeyTest = ConsoleView.ReadUserInput("Secrecy");
 
             if (masterKeyTest != masterKey)
             {
-                ConsoleView.ThrowFeedback(new UnkownAnwser("Incorrect master password."));
+                ConsoleView.PresentFeedback(new UnkownAnwser("Incorrect master password."));
                 ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
-                Console.Write("\nSecrecy > ");
-                string anwser = Console.ReadLine();
+                string anwser = ConsoleView.ReadUserInput("Secrecy");
 
                 while (anwser.ToLower() != "y" && anwser.ToLower() != "n")
                 {
-                    ConsoleView.ThrowFeedback(new UnkownAnwser("Unknown anwser. Possible anwsers: Y/N"));
+                    ConsoleView.PresentFeedback(new UnkownAnwser("Unknown anwser. Possible anwsers: Y/N"));
                     ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
-                    Console.Write("\nSecrecy > ");
-                    anwser = Console.ReadLine();
+                    anwser = ConsoleView.ReadUserInput("Secrecy");
                 }
 
                 if (anwser.ToLower() == "y")
                 {
-                    Console.Write($"Set a new master password for the vault. YOU WON'T BE ABLE TO REWRITE IT ANYMORE");
-                    Console.Write("\nSecrecy > ");
-                    masterKey = Console.ReadLine();
+                    ConsoleView.Message($"Set a new master password for the vault. YOU WON'T BE ABLE TO REWRITE IT ANYMORE");
+                    masterKey = anwser = ConsoleView.ReadUserInput("Secrecy");
+                    ;
                 }
             }
 
@@ -96,9 +75,9 @@ namespace HCLI.Modules.Secrecy.Commands
             string json = JsonSerializer.Serialize(newVault);
             File.WriteAllText(@$"{savePath}\vault.json", json);
 
-            Console.Write($"\nVault has been created under the ownership's name: {ownerName}.\n");
+            ConsoleView.Message($"\nVault has been created under the ownership's name: {ownerName}.");
 
-            return new ExpectedInput();
+            return null;
         }
     }
 }

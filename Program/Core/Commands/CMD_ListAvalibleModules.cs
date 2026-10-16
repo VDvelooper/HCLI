@@ -1,12 +1,9 @@
 ﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
-using HCLI.Program.Core.Shared.Feedback.Expecteds;
-using HCLI.Program.ModuleCore;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.Core.Commands
 {
-    public class CMD_ListAvalibleModules : ICommand
+    internal class CMD_ListAvalibleModules : ICommand
     {
         public string Syntax { get; }
         public int RequiredArgCount { get; }
@@ -21,7 +18,7 @@ namespace HCLI.Program.Core.Commands
             Description = description;
         }
 
-        public IFeedback Execute(UserInput userInput)
+        public IFeedback? Run(UserInput userInput)
         {
             Console.WriteLine();
             foreach (ModuleBase module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
@@ -29,7 +26,7 @@ namespace HCLI.Program.Core.Commands
                 Console.WriteLine(module.ModuleName);
             }
             Console.WriteLine();
-            return new ExpectedInput();
+            return null;
         }
     }
 }

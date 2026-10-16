@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
 using HCLI.Program.Core;
+using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Configuration;
 
 namespace HCLI.Program
 {
-    public class Runtime
+    internal class Runtime
     {
         // public services
         public static CommandRegistry CommandRegistry { get; private set; }
@@ -48,7 +49,7 @@ namespace HCLI.Program
                 Console.Write("HCLI > ");
                 string rawInput = Console.ReadLine();
 
-                Core.Shared.UserInput? userInput = CommandParser.Parse(rawInput, true);
+                UserInput? userInput = CommandParser.Parse(rawInput, true);
 
                 CommandExecuter.ExecuteCommand(userInput);
             }

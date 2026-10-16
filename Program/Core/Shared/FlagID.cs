@@ -1,4 +1,4 @@
-﻿namespace HCLI.Program.Core
+﻿namespace HCLI.Program.Core.Shared
 {
     public enum FlagID
     {

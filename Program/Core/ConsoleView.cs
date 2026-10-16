@@ -4,17 +4,16 @@ namespace HCLI.Program.Core
 {
     public class ConsoleView
     {
-        public static void ThrowFeedback(IFeedback feedback)
+        public static void PresentFeedback(IFeedback feedback)
         {
             if (feedback.Silent) return;
 
             switch (feedback.ResultType)
             {
-                // When expected, the ConsoleOutputOverride is never null.
                 case Shared.Feedback.FeedbackType.Expected:
 
                     if (feedback.ConsoleOutputOverride != null)
-                        Message(feedback.ConsoleOutputOverride, feedback.ConsoleOutputStyle);
+                        Message(feedback.ConsoleOutputOverride, true, feedback.ConsoleOutputStyle);
                     else if (feedback.Description != null)
                         Debug($"{feedback.FeedbackID}: {feedback.Description}");
                     break;
@@ -25,9 +24,9 @@ namespace HCLI.Program.Core
                     if (feedback.Description != null)
                         Warn($"{feedback.Description} : {feedback.FeedbackID}");
                     else if (feedback.ConsoleOutputOverride != null)
-                        Warn($"{feedback.ConsoleOutputOverride}");
-                    else
                         Warn($"{feedback.ConsoleOutputOverride} (origin: {feedback.FeedbackID})");
+                    else
+                        Warn($"{feedback.FeedbackID}");
                     break;
 
 
@@ -36,16 +35,21 @@ namespace HCLI.Program.Core
                     if (feedback.Description != null)
                         Error($"{feedback.Description} : {feedback.FeedbackID}");
                     else if (feedback.ConsoleOutputOverride != null)
-                        Error($"{feedback.ConsoleOutputOverride}");
-                    else
                         Error($"{feedback.ConsoleOutputOverride} (origin: {feedback.FeedbackID})");
+                    else
+                        Error($"{feedback.FeedbackID}");
+                    break;
+
+
+                default:
+                    Debug($"MENTOOV: ResoultType was not found and was not able to be handeled by ConsoleView.PresentFeedback.");
                     break;
             }
         }
 
 
 
-        public static void Message(string message, ConsoleOutputStyle? outputStyle = null)
+        public static void Message(string message, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
         {
             if (outputStyle != null) {
                 Console.ForegroundColor = outputStyle.ForegroundColor;
@@ -53,7 +57,7 @@ namespace HCLI.Program.Core
             }
             Console.WriteLine(message);
             Console.ResetColor();
-            Console.WriteLine();
+            if (newLine) Console.WriteLine();
         }
         public static void Debug(string message)
         {
@@ -78,5 +82,17 @@ namespace HCLI.Program.Core
             Console.ResetColor();
             Console.WriteLine();
         }
+
+
+        public static string ReadUserInput(string senderName)
+        {
+            Console.Write($"{senderName} > ");
+            string r = Console.ReadLine();
+
+            Console.Write("\n");
+
+            return r ?? string.Empty;
+        }
+
     }
 }

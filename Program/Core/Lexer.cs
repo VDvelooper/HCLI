@@ -2,7 +2,7 @@
 
 namespace HCLI.Program.Core
 {
-    public class Lexer
+    internal class Lexer
     {
         public List<string> Tokenize(string rawInput)
         {

@@ -1,5 +1,6 @@
 ﻿using HCLI.Modules.ExampleModule.Commands;
-using HCLI.Program.Core.Shared;
+using HCLI.Program.Core;
+using HCLI.Program.Core.Abstractions;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Modules.ExampleModule
@@ -19,8 +20,7 @@ namespace HCLI.Modules.ExampleModule
 
             while (IsSeparateModeRunning)
             {
-                Console.Write("ExampleModule > ");
-                string newRawInput = Console.ReadLine();
+                string newRawInput = ConsoleView.ReadUserInput(ModuleName);
 
                 UserInput? newUserInput = Program.Core.CommandParser.Parse(newRawInput, false);
 

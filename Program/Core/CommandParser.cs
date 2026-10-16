@@ -1,6 +1,7 @@
 ﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared;
 using HCLI.Program.Core.Shared.Feedback.Error;
+using HCLI.Program.Core.Shared.Feedback.Errors;
 using HCLI.Program.Core.Shared.Feedback.Warning;
 
 namespace HCLI.Program.Core
@@ -10,7 +11,7 @@ namespace HCLI.Program.Core
         private static readonly Lexer _lexer = new Lexer();
         private static readonly FlagRegistry _flagRegistry = new FlagRegistry();
 
-        public static UserInput? Parse(string rawInput, bool root)
+        public static UserInput? Parse(string rawInput)
         {
             List<string> tokens = _lexer.Tokenize(rawInput);
 
@@ -18,40 +19,49 @@ namespace HCLI.Program.Core
                 return null;
             }
 
+
             string command = tokens[0];
             List<string> reqArgs = new List<string>();
             List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
 
+
+
             int _reqArgsRemain = 0;
             int _optArgsRemain = 0;
 
-            if (/*root && */Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
+
+
+            if (Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
             {
                 _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
                 _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
             }
-            else if (/*!root && */Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
+            else if (Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
             {
                 if (foundCommand == null) throw new System.ArgumentException($"Command was not found. command: {command}"); 
 
                 _reqArgsRemain = foundCommand.RequiredArgCount;
                 _optArgsRemain = foundCommand.OptionalArgCount;
             }
-            else if (/*!root && */Runtime.ModuleRegistry.TryGetBaseCommand(command, out Action<UserInput>? found))
+            else if (Runtime.ModuleRegistry.TryGetBaseCommand(command, out Action<UserInput>? found))
             {
                 _reqArgsRemain = 0; // zzz -> a base command-okat át kellene írni ICommand-ra.
                 _optArgsRemain = 0;
             }
             else
             {
-                ConsoleView.ThrowFeedback(new UknownCommand($"The command {command} is uknown."));
+                ConsoleView.PresentFeedback(new UknownCommand($"The command {command} is uknown."));
                 return null;
             }
+
+
 
             int returnReqArgs = _reqArgsRemain;
             int returnOptArgs = _optArgsRemain;
             bool flaggedWarning = false;
+
+
 
             for (int i = 1; i < tokens.Count; i++)
             {
@@ -59,11 +69,11 @@ namespace HCLI.Program.Core
                 
                 if (IsTokenFlag(token))
                 {
-                    if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag))
-                        throw new System.ArgumentException($"Unknown flag. token: {token}");
-                
-                    if (foundFlag == null)
-                        throw new System.ArgumentException($"Flag was not found. token: {token}");
+                    if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag) || foundFlag == null)
+                    {
+                        ConsoleView.PresentFeedback(new NotFound($"Flag was not found with the token \"{token}\"."));
+                        return null;
+                    }
                 
                     ParsedFlag parsedFlag = new ParsedFlag(foundFlag);
                 
@@ -95,14 +105,24 @@ namespace HCLI.Program.Core
                         _optArgsRemain--;
                         continue;
                     }
-                    else if (!flaggedWarning)
+                    else if (!flaggedWarning) 
                     {
-                        ConsoleView.ThrowFeedback(new UnusedOptionalArgument());
+                        ConsoleView.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
                     }
                 }
             }
 
-            return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
+
+
+            if (reqArgs.Count < returnReqArgs)
+            {
+                ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
+                return null;
+            }
+            else
+                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
+
+
         }
 
 
