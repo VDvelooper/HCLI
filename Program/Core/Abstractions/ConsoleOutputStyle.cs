@@ -1,4 +1,4 @@
-﻿namespace HCLI.Program.Core
+﻿namespace HCLI.Program.Core.Abstractions
 {
     public class ConsoleOutputStyle
     {

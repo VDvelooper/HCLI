@@ -47,15 +47,13 @@ namespace HCLI.Program.Core
             }
         }
 
-
-
-        public static void Message(string message, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
+        public static void Message(string? message = null, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
         {
             if (outputStyle != null) {
                 Console.ForegroundColor = outputStyle.ForegroundColor;
                 Console.BackgroundColor = outputStyle.BackgroundColor;
             }
-            Console.WriteLine(message);
+            Console.WriteLine(message == null ? "" : message);
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
@@ -86,10 +84,10 @@ namespace HCLI.Program.Core
 
         public static string ReadUserInput(string senderName)
         {
-            Console.Write($"{senderName} > ");
-            string r = Console.ReadLine();
+            Message($"{senderName} > ", false);
+            string? r = Console.ReadLine();
 
-            Console.Write("\n");
+            Message();
 
             return r ?? string.Empty;
         }

@@ -11,45 +11,24 @@ namespace HCLI.Program.Core
 
             IFeedback feedback;
 
-            if (Runtime.CommandRegistry.TryGetHCLICommand(userInput.Command, out var foundHCLICommand)
-                &&
-                foundHCLICommand != null
-            )
-            {
-                feedback = foundHCLICommand.Execute(userInput);
-                ConsoleView.PresentFeedback(feedback);
-            }
+            feedback = userInput.Command.Execute(userInput);
 
-            else if (Runtime.ModuleRegistry.TryGetModuleCommand(userInput.Command, out var foundModuleCommand) 
-                && foundModuleCommand != null
-            )
-            {
-                feedback = foundModuleCommand.Execute(userInput);
-                ConsoleView.PresentFeedback(feedback);
-            }
+            ConsoleView.PresentFeedback(feedback);
 
-            // this means, that if it is a base command for example: exit or help
-            else if (Runtime.ModuleRegistry.TryGetBaseCommand(userInput.Command, out Action<UserInput>? found)
-                && found != null
-            )
-            {
-                found.Invoke(userInput);
-            }
-            else
-                ConsoleView.Error($"Command {userInput.Command} is unknown.");
+
 
             if (userInput.TryGetFlag(FlagID.Debug, out _))
             {
-                Console.WriteLine(
+                ConsoleView.Message(
                     $"Debug details:\n" +
                     $"Full command: {userInput.Raw}\n" +
                     $"Lexed command: {userInput.Command}\n" +
                     $"Required args count: {userInput.RequiredArgs.Count}\n" +
                     $"Optional args count: {userInput.OptionalArgs.Count}"
                 );
-                Console.WriteLine("Found flags:");
-                userInput.DetectedFlags.ForEach(flag => Console.WriteLine($"  {flag.FlagDefinition.Name}"));
-                Console.WriteLine();
+                ConsoleView.Message("Found flags:");
+                userInput.DetectedFlags.ForEach(flag => ConsoleView.Message($"  {flag.FlagDefinition.Name}"));
+                ConsoleView.Message();
             }
         }
     }

@@ -1,12 +1,11 @@
 ﻿using HCLI.Program.Core.Shared;
-using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.Core.Abstractions
 {
     public class UserInput
     {
         public string Raw;
-        public string Command;
+        public ICommand Command;
 
         public List<string> RequiredArgs;
         public int RequiredArgsCount;
@@ -33,7 +32,7 @@ namespace HCLI.Program.Core.Abstractions
             }
         }   
 
-        public UserInput(string command, List<string> requiredArgs, int requiredArgsCount, List<string> optionalArgs, int optionalArgsCount, List<ParsedFlag> flags, string raw) 
+        public UserInput(ICommand command, List<string> requiredArgs, int requiredArgsCount, List<string> optionalArgs, int optionalArgsCount, List<ParsedFlag> flags, string raw) 
         {
             Raw = raw;
             Command = command;

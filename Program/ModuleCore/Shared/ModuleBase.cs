@@ -1,29 +1,33 @@
 ﻿using HCLI.Program.Core;
 using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Configuration;
+using HCLI.Program.ModuleCore.Commands;
 
 namespace HCLI.Program.ModuleCore.Shared
 {
-    public class    ModuleBase
+    public class ModuleBase
     {
         public string ModuleName { get; private set; }
         public string ModuleCommand { get; private set; }
-        public Dictionary<string, Action<UserInput>> BaseCommands { get; private set; }
+        public List<ICommand> BaseCommands { get; private set; }
         public List<ICommand> SubCommands { get; private set; }
 
-        private bool _isSeparateMode;
+        public bool _isSeparateMode;
         protected bool _isSeparateModeRunning;
+
         public bool IsSeparateMode
         {
             get { return _isSeparateMode; }
-            internal set { _isSeparateMode = value; }
+            set { _isSeparateMode = value; } // később problémás lehet hogy nem internal vagy más
         }
         public bool IsSeparateModeRunning
         {
             get { return _isSeparateModeRunning; }
-            protected set { _isSeparateModeRunning = value; }
+            set { _isSeparateModeRunning = value; } // később problémás lehet hogy nem internal vagy más
         }
 
-        public static string MODULE_DATA_DIR_PATH = @$"{Runtime.ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
+        public delegate IFeedback? ModuleExecuteon(UserInput userInput, ModuleBase? sender);
+        public static string MODULE_DATA_DIR_PATH = @$"{ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
 
         
         public ModuleBase(string moduleName, string moduleCommand, bool separateMode)
@@ -36,16 +40,16 @@ namespace HCLI.Program.ModuleCore.Shared
 
             SubCommands = new List<ICommand>();
 
-            BaseCommands = new Dictionary<string, Action<UserInput>>()
+            CMD_Exit cmd_exit = new CMD_Exit("exit", 0, 0, "Exits the Module if it is a seperate program like module.");
+            CMD_Help cmd_help = new CMD_Help("help", 0, 1, "Writes out all avalible commands in the current module.");
+            CMD_ModuleExecute cmd_moduleExecute = new CMD_ModuleExecute(moduleCommand, 0, 1, "Writes out all avalible commands in the current module.");
+            // zzz...
+
+            /*BaseCommands = new List<ICommand>()
             {
-                {
-                    this.ModuleCommand,
-                    args => ModuleExecute(args)
+                CMD_ModuleExecute(args)
                 },
-                {
-                    "exit",
-                    args => ExitModuleCommand(args)
-                },
+                
                 {
                     "help",
                     args => HelpModuleCommand(args)
@@ -54,21 +58,13 @@ namespace HCLI.Program.ModuleCore.Shared
                     "printdir",
                     args => PrintDirectory(args)
                 }
-            };
+            };*/
 
             if (!Path.Exists(MODULE_DATA_DIR_PATH))
                 Directory.CreateDirectory(MODULE_DATA_DIR_PATH);
         }
-
         public virtual void ModuleExecute(UserInput userInput) { }
 
-        private void ExitModuleCommand(UserInput _)
-        {
-            if (!_isSeparateMode) return;
-            if (!IsSeparateModeRunning) return;
-
-            IsSeparateModeRunning = false;
-        }
 
         private void HelpModuleCommand(UserInput _)
         {
@@ -79,14 +75,14 @@ namespace HCLI.Program.ModuleCore.Shared
                 commandList.Add(pair.Key);
             }
 
-            Console.WriteLine();
+            ConsoleView.Message();
 
             foreach (string printout in commandList)
             {
-                Console.WriteLine(printout);
+                ConsoleView.Message(printout);
             }
 
-            Console.WriteLine();
+            ConsoleView.Message();
         }
 
         private void PrintDirectory(UserInput _)

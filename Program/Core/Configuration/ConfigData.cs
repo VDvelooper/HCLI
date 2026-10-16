@@ -1,6 +1,6 @@
 ﻿namespace HCLI.Program.Core.Configuration
 {
-    public class ConfigData
+    internal class ConfigData
     {
         public string UserName { get; set; }
         public bool SetupComplete { get; set; }

@@ -1,21 +1,14 @@
-﻿using HCLI.Program.ModuleCore;
-using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Commands;
-using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program
 {
     public class CommandRegistry
     {
-
-        /// <summary>
-        /// All variables related to finding the user given command and it's representitive method.
-        /// </summary>
-        public Dictionary<string, ICommand> Commands;
+        public static Dictionary<string, ICommand> Commands;
 
         public CommandRegistry()
         {
-
             CMD_Exit cmd_exit = new("exit", 0, 0, "Exits HCLI.");
             CMD_Help cmd_help = new("help", 0, 1, "Writes out all the base commands.");
             CMD_Echo cmd_echo = new("echo", 1, 0, "Outputs the text followed by the 'echo' keyword.");
@@ -32,56 +25,15 @@ namespace HCLI.Program
             };
         }
 
-        public bool TryGetHCLICommand(string command, out Program.Core.Abstractions.ICommand? found)
+        public static bool TryGetHCLICommand(string command, out Program.Core.Abstractions.ICommand? found)
         {
             found = Commands.Where(x=>x.Value.Syntax == command).Select(x => x.Value).FirstOrDefault();
             return found != null;
         }
 
-        public bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
+        public static bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
         {
             return args.Count == expectedArgsCount - 1;
-        }
-
-
-        // The methods of the base CLI commands defined from here.
-
-
-        public void Exit(List<string> args)
-        {
-            Runtime.SessionData.Running = false;
-        }
-        public void Echo(List<string> args)
-        {
-            string restoredString = "";
-
-            foreach (string part in args)
-            {
-                restoredString += $"{part} ";
-            }
-
-            Console.WriteLine($"{restoredString}\n");
-        }
-        public static void Help(List<string> args)
-        {
-            Console.WriteLine($"\nexit -> Exits HCLI.\n" +
-                $"echo -> Outputs the text followed by the 'echo' keyword. [1th arg: the text itself]\n" +
-                $"clear -> Clears the console. [0 arguments]\n" +
-                $"help -> Writes out all the base commands. [0 arguments]\n" +
-                $"lam -> Writes out all the avalible modules. [0 arguments]\n");
-        }
-        public void Clear(List<string> args)
-        {
-            Console.Clear();
-        }
-        public void ListAvalibleModules(List<string> args)
-        {
-            Console.WriteLine();
-            foreach (ModuleBase module in Runtime.ModuleRegistry.AVALIBLE_MODULES)
-            {
-                Console.WriteLine(module.ModuleName);
-            }
-            Console.WriteLine();
         }
     }
 }

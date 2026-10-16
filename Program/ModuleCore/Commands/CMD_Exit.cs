@@ -1,4 +1,5 @@
 ﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.ModuleCore.Commands
@@ -18,12 +19,16 @@ namespace HCLI.Program.ModuleCore.Commands
             Description = description;
         }
 
-        public IFeedback? Run(UserInput userInput, ModuleBase sender)
-        {
-            if (!_isSeparateMode) return;
-            if (!IsSeparateModeRunning) return;
 
-            IsSeparateModeRunning = false;
+        public IFeedback? Run(UserInput userInput, ModuleBase? sender)
+        {
+            if (sender == null) return new NotFound("The sender module is null.");
+            if (!sender.IsSeparateMode) return null;
+            if (!sender.IsSeparateModeRunning) return null;
+
+            sender.IsSeparateModeRunning = false;
+
+            return null;
         }
     }
 }

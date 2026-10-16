@@ -9,7 +9,6 @@ namespace HCLI.Program
     {
         // public services
         public static CommandRegistry CommandRegistry { get; private set; }
-        public static ConfigManager ConfigManager { get; private set; }
         public static Session.SessionData SessionData { get; private set; }
         public static ModuleRegistry ModuleRegistry { get; private set; }
 
@@ -36,20 +35,19 @@ namespace HCLI.Program
         {
             if (!ConfigManager.ConfigData.SetupComplete)
             {
-                Console.WriteLine($">>Welcome to HCLI!<< \n Made by Danikaz64 \n");
+                ConsoleView.Message($">>Welcome to HCLI!<< \n Made by Danikaz64 \n");
             }
             else
             {
-                Console.WriteLine($"Welcome back {ConfigManager.ConfigData.UserName}!\n");
+                ConsoleView.Message($"Welcome back {ConfigManager.ConfigData.UserName}!\n");
             }
 
 
             while (SessionData.Running)
             {
-                Console.Write("HCLI > ");
-                string rawInput = Console.ReadLine();
+                string? rawInput = ConsoleView.ReadUserInput("HCLI");
 
-                UserInput? userInput = CommandParser.Parse(rawInput, true);
+                UserInput? userInput = CommandParser.Parse(rawInput);
 
                 CommandExecuter.ExecuteCommand(userInput);
             }
@@ -62,7 +60,6 @@ namespace HCLI.Program
         private static void SetDefault()
         {
             CommandRegistry = new CommandRegistry();
-            ConfigManager = new ConfigManager();
             SessionData = new Session.SessionData();
 
             ModuleRegistry = new ModuleRegistry();

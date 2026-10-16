@@ -1,4 +1,5 @@
 ﻿using HCLI.Program.Core.Shared.Feedback.Expecteds;
+using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.Core.Abstractions
 {
@@ -8,9 +9,9 @@ namespace HCLI.Program.Core.Abstractions
         abstract int RequiredArgCount { get; }
         abstract int OptionalArgCount { get; }
         abstract string Description { get; }
-        abstract IFeedback? Run(UserInput userInput);
+        abstract IFeedback? Run(UserInput userInput, ModuleBase? sender = null);
 
-        IFeedback Execute(UserInput userInput) 
+        IFeedback Execute(UserInput userInput)
         { 
             return Run(userInput) ?? new ExpectedInput(); 
         }

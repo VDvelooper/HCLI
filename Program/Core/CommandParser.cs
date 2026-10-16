@@ -11,16 +11,20 @@ namespace HCLI.Program.Core
         private static readonly Lexer _lexer = new Lexer();
         private static readonly FlagRegistry _flagRegistry = new FlagRegistry();
 
-        public static UserInput? Parse(string rawInput)
+        public static UserInput? Parse(string? rawInput)
         {
+            if (string.IsNullOrEmpty(rawInput)) 
+                return null;
+
             List<string> tokens = _lexer.Tokenize(rawInput);
 
             if (tokens.Count == 0) {
                 return null;
             }
 
+            string rawCommand = tokens[0];
 
-            string command = tokens[0];
+            ICommand command;
             List<string> reqArgs = new List<string>();
             List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
@@ -32,26 +36,27 @@ namespace HCLI.Program.Core
 
 
 
-            if (Runtime.CommandRegistry.TryGetHCLICommand(command, out _))
+            if (CommandRegistry.TryGetHCLICommand(rawCommand, out ICommand? foundHCLICommand) && foundHCLICommand != null)
             {
-                _reqArgsRemain = Runtime.CommandRegistry.Commands[command].RequiredArgCount;
-                _optArgsRemain = Runtime.CommandRegistry.Commands[command].OptionalArgCount;
+                _reqArgsRemain = foundHCLICommand.RequiredArgCount;
+                _optArgsRemain = foundHCLICommand.OptionalArgCount;
+                command = foundHCLICommand;
             }
-            else if (Runtime.ModuleRegistry.TryGetModuleCommand(command, out ICommand? foundCommand))
+            else if (Runtime.ModuleRegistry.TryGetModuleCommand(rawCommand, out ICommand? foundModuleCommand) && foundModuleCommand != null)
             {
-                if (foundCommand == null) throw new System.ArgumentException($"Command was not found. command: {command}"); 
-
-                _reqArgsRemain = foundCommand.RequiredArgCount;
-                _optArgsRemain = foundCommand.OptionalArgCount;
+                _reqArgsRemain = foundModuleCommand.RequiredArgCount;
+                _optArgsRemain = foundModuleCommand.OptionalArgCount;
+                command = foundModuleCommand;
             }
-            else if (Runtime.ModuleRegistry.TryGetBaseCommand(command, out Action<UserInput>? found))
+            else if (Runtime.ModuleRegistry.TryGetBaseCommand(rawCommand, out Action<UserInput>? found) && found != null)
             {
                 _reqArgsRemain = 0; // zzz -> a base command-okat át kellene írni ICommand-ra.
                 _optArgsRemain = 0;
+                //command = found; <- ERRE NAGY SZÜKSÉG LENNE
             }
             else
             {
-                ConsoleView.PresentFeedback(new UknownCommand($"The command {command} is uknown."));
+                ConsoleView.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
                 return null;
             }
 
@@ -121,13 +126,13 @@ namespace HCLI.Program.Core
             }
             else
                 return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
-
-
         }
 
 
-        private static bool IsTokenFlag(string token) => token.StartsWith("--");
+        // -- private -- //
 
+
+        private static bool IsTokenFlag(string token) => token.StartsWith("--");
 
         private static List<string> GetFlagValues(List<string> tokens, ref int i, FlagDefinition flagDef)
         {
