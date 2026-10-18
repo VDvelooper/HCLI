@@ -1,94 +1,102 @@
-﻿namespace HCLI.Program.ModuleCore.Shared
+﻿using HCLI.Program.Core;
+using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Configuration;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
+using HCLI.Program.ModuleCore.Commands;
+
+namespace HCLI.Program.ModuleCore.Shared
 {
-    public class ModuleBase
+    public abstract class ModuleBase
     {
-        public string ModuleName { get; protected set; }
-        public string ModuleCommand { get; protected set; }
-        public Dictionary<string, Action<ModuleModeUserInput>> SubCommands { get; set; }
+        public string ModuleName { get; private set; }
+        public string ModuleCommand { get; private set; }
+        public List<ICommand> BaseCommands { get; private set; }
+        public List<ICommand> SubCommands { get; private set; }
 
-        public static string MODULE_DATA_DIR_PATH = @$"{Runtime.ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
+        public bool _isSeparateMode;
+        protected bool _isSeparateModeRunning;
 
-        // Instance
-
-        protected bool _separateMode;
-        protected bool _separateModeRunning;
-
-        public ModuleBase(string Name, string ModuleCommand, bool separateMode)
+        public bool IsSeparateMode
         {
-            ModuleName = Name;
-            this.ModuleCommand = ModuleCommand;
-            _separateMode = separateMode;
-            _separateModeRunning = false;
+            get { return _isSeparateMode; }
+            /*set { _isSeparateMode = value; }*/ // később problémás lehet hogy nem internal vagy más
+        }
+        public bool IsSeparateModeRunning
+        {
+            get { return _isSeparateModeRunning; }
+            set { _isSeparateModeRunning = value; } // később problémás lehet hogy nem internal vagy más
+        }
 
-            SubCommands = new()
+        
+        public static string MODULE_DATA_DIR_PATH = @$"{ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
+
+        
+        public ModuleBase(string moduleName, string moduleCommand, bool separateMode)
+        {
+            _isSeparateMode = separateMode;
+            IsSeparateModeRunning = false;
+
+            ModuleName = moduleName;
+            ModuleCommand = moduleCommand;
+
+            SubCommands = new List<ICommand>();
+
+            CMD_Exit cmd_exit = new CMD_Exit("exit", 0, 0, "Exits the Module if it is a seperate program like module.", this);
+            CMD_Help cmd_help = new CMD_Help("help", 0, 1, "Writes out all avalible commands in the current module.", this);
+            CMD_ModuleExecute cmd_moduleExecute = new CMD_ModuleExecute(moduleCommand, 0, int.MaxValue, "Writes out all avalible commands in the current module.", this);
+
+            BaseCommands = new List<ICommand>()
             {
-                {
-                    "exit",
-                    args => ExitModuleCommand(args)
-                },
-                {
-                    this.ModuleCommand,
-                    args => EnterModuleCommand(args)
-                },
-                {
-                    "help",
-                    args => HelpModuleCommand(args)
-                }
+                cmd_exit,
+                cmd_help,
+                cmd_moduleExecute
             };
-
-            Console.WriteLine($"MODULE_DATA_DIR_PATH:{MODULE_DATA_DIR_PATH}");
 
             if (!Path.Exists(MODULE_DATA_DIR_PATH))
                 Directory.CreateDirectory(MODULE_DATA_DIR_PATH);
         }
 
-
-        public void SubCommandParser(ModuleModeUserInput userInput)
+        /// <summary>
+        /// The manager of the Module. Calls the core logic and manages Separate Program Module functionality.
+        /// </summary>
+        public IFeedback ModuleExecute(UserInput userInput)
         {
-            string subCommand = "";
+            if (IsSeparateMode) Entry();
 
-            if (SubCommands.ContainsKey(userInput.ModuleCommand))
+            if (IsSeparateMode) IsSeparateModeRunning = true;
+
+            IFeedback? feedback = null;
+
+            feedback = ModuleBody(userInput);
+
+            while (IsSeparateModeRunning)
             {
-                SubCommands[userInput.ModuleCommand](userInput);
+                feedback = ModuleBody(userInput);
             }
-            else
-            {
-                Console.WriteLine($"{ModuleName}> The module command '{userInput.ModuleCommand}' is unknown.\n");
-                return;
-            }
+
+            if (IsSeparateMode) Exit();
+
+            return feedback ?? new ExpectedInput();
         }
 
-        private void EnterModuleCommand(ModuleModeUserInput userInput)
+        /// <summary>
+        /// The very first thing that happenes when the ModuleExecute method is called.
+        /// </summary>
+        public virtual void Entry() { }
+        /// <summary>
+        /// The very last thing that happenes when the ModuleExecute method is at the end.
+        /// </summary>
+        public virtual void Exit() { }
+
+        /// <summary>
+        /// The the body of a Module. The Module's entry calls it. 
+        /// </summary>
+        /// <returns></returns>
+        public abstract IFeedback? ModuleBody(UserInput userInput);
+
+        private void PrintDirectory(UserInput _)
         {
-            if (!_separateMode) return;
-            if (_separateModeRunning) return;
-
-            _separateModeRunning = true;
-        }
-        private void ExitModuleCommand(ModuleModeUserInput userInput)
-        {
-            if (!_separateMode) return;
-            if (!_separateModeRunning || userInput.Args.Count > 0) return;
-
-            _separateModeRunning = false;
-        }
-        private void HelpModuleCommand(ModuleModeUserInput userInput)
-        {
-            List<string> commandList = new List<string>();
-
-            foreach (KeyValuePair<string, Action<ModuleModeUserInput>> pair in SubCommands)
-            {
-                commandList.Add(pair.Key);
-            }
-
-            Console.WriteLine();
-
-            foreach (string printout in commandList)
-            {
-                Console.WriteLine(printout);
-            }
-
-            Console.WriteLine();
+            ConsoleView.Message($"Module data directory: {MODULE_DATA_DIR_PATH}");
         }
     }
 }

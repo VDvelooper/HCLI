@@ -1,19 +1,22 @@
-﻿using HCLI.Program.Core.Configuration;
+﻿using System.Diagnostics;
+using HCLI.Program.Core;
+using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Configuration;
 
 namespace HCLI.Program
 {
-    public class Runtime
+    internal class Runtime
     {
-        public static CommandManager CommandManager { get; private set; }
-        public static ConfigManager ConfigManager { get; private set; }
+        // public services
+        public static CommandRegistry CommandRegistry { get; private set; }
         public static Session.SessionData SessionData { get; private set; }
-
         public static ModuleRegistry ModuleRegistry { get; private set; }
+        public static ConfigManager ConfigManager { get; private set; }
 
-
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+
             SetDefault();
 
             ConfigManager.LoadConfig();
@@ -21,34 +24,33 @@ namespace HCLI.Program
             ConfigManager.SaveConfig();
         }
 
-        
+        private static void OnProcessExit(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Saving config");
+            ConfigManager.SaveConfig();
+            Debug.WriteLine("Savinged config");
+        }
+
+
         public static void CommandLoop()
         {
             if (!ConfigManager.ConfigData.SetupComplete)
             {
-                Console.WriteLine($">>Welcome to HCLI!<<\n" +
-                $"Made by Danikaz64\n\n" +
-                $">>Some info<<\n" +
-                $"  - The saving side of the application only works if you exit with the exit command.\n" +
-                $"------------------------------------------------------------------------------------------------------------------------");
+                ConsoleView.Message($">>Welcome to HCLI!<< \n Made by Danikaz64 \n");
             }
             else
             {
-                Console.WriteLine($"Welcome back {ConfigManager.ConfigData.UserName}!\n\n" +
-                $">>Some info<<\n" +
-                $"  - The saving side of the application only works if you exit with the exit command.\n" +
-                $"------------------------------------------------------------------------------------------------------------------------");
+                ConsoleView.Message($"Welcome back {ConfigManager.ConfigData.UserName}!\n");
             }
 
 
             while (SessionData.Running)
             {
-                Console.Write("HCLI > ");
-                string userInput = Console.ReadLine();
+                string? rawInput = ConsoleView.ReadUserInput("HCLI");
 
-                Core.Shared.UserInput currentInput = new Core.Shared.UserInput(userInput);
+                UserInput? userInput = CommandParser.Parse(rawInput);
 
-                CommandManager.CommandParser(currentInput);
+                CommandExecuter.ExecuteCommand(userInput);
             }
         }
 
@@ -58,9 +60,9 @@ namespace HCLI.Program
         /// </summary>
         private static void SetDefault()
         {
-            CommandManager = new CommandManager();
-            ConfigManager = new ConfigManager();
+            CommandRegistry = new CommandRegistry();
             SessionData = new Session.SessionData();
+            ConfigManager = new ConfigManager();
 
             ModuleRegistry = new ModuleRegistry();
 
