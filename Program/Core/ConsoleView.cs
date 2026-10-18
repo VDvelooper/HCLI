@@ -57,13 +57,13 @@ namespace HCLI.Program.Core
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
-        public static void Debug(string message)
+        public static void Debug(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine(message);
             Console.ResetColor();
-            Console.WriteLine();
+            if (newLine) Console.WriteLine();
         }
         public static void Warn(string message)
         {

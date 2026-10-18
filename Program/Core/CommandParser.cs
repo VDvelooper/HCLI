@@ -42,21 +42,18 @@ namespace HCLI.Program.Core
                 _reqArgsRemain = foundHCLICommand.RequiredArgCount;
                 _optArgsRemain = foundHCLICommand.OptionalArgCount;
                 command = foundHCLICommand;
-                ConsoleView.Debug($"Found HCLI command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetModuleSubCommand(rawCommand, out ICommand? foundModuleCommand) && foundModuleCommand != null)
             {
                 _reqArgsRemain = foundModuleCommand.RequiredArgCount;
                 _optArgsRemain = foundModuleCommand.OptionalArgCount;
                 command = foundModuleCommand;
-                ConsoleView.Debug($"Found base command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetBaseCommand(rawCommand, out ICommand? found) && found != null)
             {
                 _reqArgsRemain = found.RequiredArgCount;
                 _optArgsRemain = found.OptionalArgCount;
                 command = found;
-                ConsoleView.Debug($"Found base command. Command: {rawCommand}");
             }
             else
             {
@@ -163,14 +160,12 @@ namespace HCLI.Program.Core
                 _reqArgsRemain = foundModuleCommand.RequiredArgCount;
                 _optArgsRemain = foundModuleCommand.OptionalArgCount;
                 command = foundModuleCommand;
-                ConsoleView.Debug($"Found base command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetBaseCommand(rawCommand, out ICommand? found) && found != null)
             {
                 _reqArgsRemain = found.RequiredArgCount;
                 _optArgsRemain = found.OptionalArgCount;
                 command = found;
-                ConsoleView.Debug($"Found base command. Command: {rawCommand}");
             }
             else
             {

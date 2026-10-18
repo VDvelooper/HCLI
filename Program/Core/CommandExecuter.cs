@@ -19,15 +19,15 @@ namespace HCLI.Program.Core
 
             if (userInput.TryGetFlag(FlagID.Debug, out _))
             {
-                ConsoleView.Message(
+                ConsoleView.Debug(
                     $"Debug details:\n" +
                     $"Full command: {userInput.Raw}\n" +
                     $"Lexed command: {userInput.Command}\n" +
                     $"Required args count: {userInput.RequiredArgs.Count}\n" +
                     $"Optional args count: {userInput.OptionalArgs.Count}"
                 );
-                ConsoleView.Message("Found flags:");
-                userInput.DetectedFlags.ForEach(flag => ConsoleView.Message($"  {flag.FlagDefinition.Name}"));
+                ConsoleView.Debug("Found flags:", false);
+                userInput.DetectedFlags.ForEach(flag => ConsoleView.Debug($"  {flag.FlagDefinition.Name}"));
                 ConsoleView.Message();
             }
         }
