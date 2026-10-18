@@ -11,6 +11,7 @@ namespace HCLI.Program
         public static CommandRegistry CommandRegistry { get; private set; }
         public static Session.SessionData SessionData { get; private set; }
         public static ModuleRegistry ModuleRegistry { get; private set; }
+        public static ConfigManager ConfigManager { get; private set; }
 
         private static void Main(string[] args)
         {
@@ -61,6 +62,7 @@ namespace HCLI.Program
         {
             CommandRegistry = new CommandRegistry();
             SessionData = new Session.SessionData();
+            ConfigManager = new ConfigManager();
 
             ModuleRegistry = new ModuleRegistry();
 

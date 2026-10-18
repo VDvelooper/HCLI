@@ -1,32 +1,38 @@
-﻿using HCLI.Modules.ExampleModule.Commands;
-using HCLI.Program.Core;
+﻿using HCLI.Program.Core;
 using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared.Feedback.Error;
+using HCLI.Program.Core.Shared.Feedback.Expecteds;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Modules.ExampleModule
 {
     public class ExampleModule : ModuleBase
     {
-        public ExampleModule(bool isSeparateMode) : base("ModuleExample", "moduleexample", isSeparateMode)
-        {
-            CMD_ExampleModuleCommand cmd_exampleModuleCommand = new("test", 0, 0, "This is an example module command!");
+        public ExampleModule(bool isSeparateMode) : base("ModuleExample", "moduleexample", isSeparateMode) { }
 
-            SubCommands.Add(cmd_exampleModuleCommand);
+        public override IFeedback ModuleBody(UserInput userInput) 
+        {
+            string newRawInput = ConsoleView.ReadUserInput(ModuleName);
+
+            UserInput? newUserInput = Program.Core.CommandParser.ParseForModules(newRawInput, this);
+
+            if (newUserInput != null)
+            { 
+                Program.Core.CommandExecuter.ExecuteCommand(userInput);
+                return new ExpectedInput();
+            }
+
+            return new InternalNullExeption();
         }
 
-        public override void ModuleExecute(UserInput userInput) 
+        public override void Entry()
         {
-            IsSeparateModeRunning = true;
+            base.Entry();
+        }
 
-            while (IsSeparateModeRunning)
-            {
-                string newRawInput = ConsoleView.ReadUserInput(ModuleName);
-
-                UserInput? newUserInput = Program.Core.CommandParser.Parse(newRawInput, false);
-
-                if (newUserInput != null) 
-                    Program.Core.CommandExecuter.ExecuteCommand(userInput);
-            }
+        public override void Exit()
+        {
+            base.Exit();
         }
     }
 }

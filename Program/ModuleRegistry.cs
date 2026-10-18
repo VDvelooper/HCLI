@@ -20,22 +20,7 @@ namespace HCLI.Program
             AVALIBLE_MODULES.Add(CLASS_SECRECY); // (1) Akkor adjuk hozzá amikor a felhasználó kijelöli azt implementációra
         }
 
-
-        public bool TryExecutingCommandFromModule(UserInput userInput)
-        {
-            foreach (ModuleBase module in AVALIBLE_MODULES)
-            {
-                if (module.ModuleCommand == userInput.Command)
-                {
-                    module.ModuleExecute(userInput);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool TryGetModuleCommand(string command, out Core.Abstractions.ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
+        public bool TryGetModuleSubCommand(string command, out Core.Abstractions.ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
         {
             found = null;
 
@@ -51,14 +36,19 @@ namespace HCLI.Program
             return false;
         }
 
-        public bool TryGetBaseCommand(string command, out Action<UserInput>? found)
+        public bool TryGetBaseCommand(string command, out ICommand? found)
         {
             found = null;
 
             foreach (ModuleBase module in AVALIBLE_MODULES)
             {
-                if (module.BaseCommands.ContainsKey(command))
-                    found = module.BaseCommands[command];
+                found = module.BaseCommands.Where(c => c.Syntax == command).FirstOrDefault();
+
+                if (found != null)
+                {
+                    found = module.BaseCommands.Where(c => c.Syntax == command).First();
+                    break;
+                }
             }
 
             return found != null;

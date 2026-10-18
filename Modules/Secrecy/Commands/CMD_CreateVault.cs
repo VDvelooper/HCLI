@@ -2,7 +2,7 @@
 using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.Core.Shared.Feedback.Errors;
-using HCLI.Program.Core.Shared.Feedback.Expecteds;
+using HCLI.Program.ModuleCore.Shared;
 using System.Text.Json;
 
 namespace HCLI.Modules.Secrecy.Commands
@@ -13,14 +13,17 @@ namespace HCLI.Modules.Secrecy.Commands
         public int RequiredArgCount { get; }
         public int OptionalArgCount { get; }
         public string Description { get; }
+        public ModuleBase ParentModule { get; }
 
-        public CMD_CreateVault(string syntax, int requiredArgCount, int optionalArgCount, string description)
+        public CMD_CreateVault(string syntax, int requiredArgCount, int optionalArgCount, string description, ModuleBase parentModule)
         {
             Syntax = syntax;
             RequiredArgCount = requiredArgCount;
             OptionalArgCount = optionalArgCount;
             Description = description;
+            ParentModule = parentModule;
         }
+
 
         public IFeedback? Run(UserInput userInput)
         {
@@ -65,7 +68,6 @@ namespace HCLI.Modules.Secrecy.Commands
                 {
                     ConsoleView.Message($"Set a new master password for the vault. YOU WON'T BE ABLE TO REWRITE IT ANYMORE");
                     masterKey = anwser = ConsoleView.ReadUserInput("Secrecy");
-                    ;
                 }
             }
 

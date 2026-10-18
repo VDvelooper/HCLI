@@ -30,7 +30,7 @@ namespace HCLI.Program.Core.Abstractions
                     return OptionalArgs.Count > 0;
                 else return true;
             }
-        }   
+        }
 
         public UserInput(ICommand command, List<string> requiredArgs, int requiredArgsCount, List<string> optionalArgs, int optionalArgsCount, List<ParsedFlag> flags, string raw) 
         {

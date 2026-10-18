@@ -53,7 +53,7 @@ namespace HCLI.Program.Core
                 Console.ForegroundColor = outputStyle.ForegroundColor;
                 Console.BackgroundColor = outputStyle.BackgroundColor;
             }
-            Console.WriteLine(message == null ? "" : message);
+            Console.Write(message == null ? "" : message);
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }

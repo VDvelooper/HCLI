@@ -31,6 +31,35 @@ namespace HCLI.Program
             return found != null;
         }
 
+        /// <summary>
+        /// Search which includes only Module subcommands.
+        /// </summary>
+        /// <returns>Base command or Module command</returns>
+        public static bool TryGetModuleSubCommand(string command, out ICommand? found)
+        {
+            ModuleRegistry mr = Runtime.ModuleRegistry;
+
+            mr.TryGetModuleSubCommand(command, out found);
+
+            return found != null;
+
+        }
+
+        /// <summary>
+        /// Search which includes Base Commands and Module subcommands.
+        /// </summary>
+        /// <returns>Base command or Module's subcommand</returns>
+        public static bool TryGetModuleCommand(string command, out ICommand? found)
+        {
+            ModuleRegistry mr = Runtime.ModuleRegistry;
+
+            mr.TryGetBaseCommand(command, out found);
+            if (found == null)
+                mr.TryGetModuleSubCommand(command, out found); 
+
+            return found != null;
+        }
+        
         public static bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
         {
             return args.Count == expectedArgsCount - 1;

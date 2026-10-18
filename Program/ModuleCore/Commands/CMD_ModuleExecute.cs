@@ -1,7 +1,6 @@
-﻿using HCLI.Program.Core;
-using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.ModuleCore.Shared;
-using static HCLI.Program.ModuleCore.Shared.ModuleBase;
 
 namespace HCLI.Program.ModuleCore.Commands
 {
@@ -12,21 +11,33 @@ namespace HCLI.Program.ModuleCore.Commands
         public int OptionalArgCount { get; }
         public string Description { get; }
 
-        private ModuleExecuteon ModuleExecuteMethod;
+        public ModuleBase ParentModule { get; }
 
-        public CMD_ModuleExecute(string syntax, int requiredArgCount, int optionalArgCount, string description, ModuleExecuteon moduleExecuteMethod)
+        public CMD_ModuleExecute(string syntax, int requiredArgCount, int optionalArgCount, string description, ModuleBase parentModule)
         {
             Syntax = syntax;
             RequiredArgCount = requiredArgCount;
             OptionalArgCount = optionalArgCount;
             Description = description;
-            ModuleExecuteMethod = moduleExecuteMethod;
+            ParentModule = parentModule;
         }
 
-
-        public IFeedback? Run(UserInput userInput, ModuleBase? sender)
+        /// <summary>
+        /// Calls the parent Module's entry point.
+        /// </summary>
+        public IFeedback? Run(UserInput userInput)
         {
-            return ModuleExecuteMethod.Invoke(userInput, sender);
+            if (userInput.OptionalArgs.Count > 0)
+            {
+                ICommand? subCommand;
+
+                CommandRegistry.TryGetModuleCommand(userInput.OptionalArgs[0], out subCommand);
+
+                if (subCommand != null)
+                    return subCommand.Execute(userInput);
+            }
+
+            return ParentModule.ModuleExecute(userInput);
         }
     }
 }
