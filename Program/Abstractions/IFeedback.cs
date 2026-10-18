@@ -1,6 +1,6 @@
 ﻿using HCLI.Program.Core.Shared.Feedback;
 
-namespace HCLI.Program.Core.Abstractions
+namespace HCLI.Program.Abstractions
 {
     public interface IFeedback
     {

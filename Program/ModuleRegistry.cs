@@ -1,6 +1,6 @@
 ﻿using HCLI.Modules.ExampleModule;
 using HCLI.Modules.Secrecy;
-using HCLI.Program.Core.Abstractions;
+using HCLI.Program.Abstractions;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program
@@ -20,7 +20,7 @@ namespace HCLI.Program
             AVALIBLE_MODULES.Add(CLASS_SECRECY); // (1) Akkor adjuk hozzá amikor a felhasználó kijelöli azt implementációra
         }
 
-        public bool TryGetModuleSubCommand(string command, out Core.Abstractions.ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
+        public bool TryGetModuleSubCommand(string command, out ICommand? found) // zzz -> át kell írni a module-oknak a kommandjait külön .cs-re, mindet aztán erre visszatérni.
         {
             found = null;
 

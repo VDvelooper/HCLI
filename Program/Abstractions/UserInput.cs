@@ -1,6 +1,6 @@
 ﻿using HCLI.Program.Core.Shared;
 
-namespace HCLI.Program.Core.Abstractions
+namespace HCLI.Program.Abstractions
 {
     public class UserInput
     {

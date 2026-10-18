@@ -1,5 +1,5 @@
-﻿using HCLI.Program.Core;
-using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
+using HCLI.Program.Core;
 using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.Core.Shared.Feedback.Errors;
 using HCLI.Program.ModuleCore.Shared;
@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace HCLI.Modules.Secrecy.Commands
 {
-    internal class CMD_CreateVault : Program.Core.Abstractions.ICommand
+    internal class CMD_CreateVault : ICommand
     {
         public string Syntax { get; }
         public int RequiredArgCount { get; }

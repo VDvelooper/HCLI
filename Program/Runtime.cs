@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
+using HCLI.Program.Abstractions;
 using HCLI.Program.Core;
-using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Configuration;
 
 namespace HCLI.Program

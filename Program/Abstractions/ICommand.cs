@@ -1,7 +1,7 @@
 ﻿using HCLI.Program.Core.Shared.Feedback.Expecteds;
 using HCLI.Program.ModuleCore.Shared;
 
-namespace HCLI.Program.Core.Abstractions
+namespace HCLI.Program.Abstractions
 {
     public interface ICommand
     {

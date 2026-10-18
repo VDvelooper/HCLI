@@ -1,4 +1,4 @@
-﻿using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
 
 namespace HCLI.Program.Core.Shared.Feedback.Warning
 {

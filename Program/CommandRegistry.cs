@@ -1,4 +1,4 @@
-﻿using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
 using HCLI.Program.Core.Commands;
 
 namespace HCLI.Program
@@ -25,7 +25,7 @@ namespace HCLI.Program
             };
         }
 
-        public static bool TryGetHCLICommand(string command, out Program.Core.Abstractions.ICommand? found)
+        public static bool TryGetHCLICommand(string command, out ICommand? found)
         {
             found = Commands.Where(x=>x.Value.Syntax == command).Select(x => x.Value).FirstOrDefault();
             return found != null;
@@ -42,7 +42,6 @@ namespace HCLI.Program
             mr.TryGetModuleSubCommand(command, out found);
 
             return found != null;
-
         }
 
         /// <summary>

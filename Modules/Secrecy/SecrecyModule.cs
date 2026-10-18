@@ -1,6 +1,6 @@
 ﻿using HCLI.Modules.Secrecy.Commands;
+using HCLI.Program.Abstractions;
 using HCLI.Program.Core;
-using HCLI.Program.Core.Abstractions;
 using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.ModuleCore.Shared;
 using System.Text.Json;

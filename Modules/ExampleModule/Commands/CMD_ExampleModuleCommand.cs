@@ -1,10 +1,10 @@
-﻿using HCLI.Program.Core;
-using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
+using HCLI.Program.Core;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Modules.ExampleModule.Commands
 {
-    public class CMD_ExampleModuleCommand : Program.Core.Abstractions.ICommand
+    public class CMD_ExampleModuleCommand : ICommand
     {
         public string Syntax { get; }
         public int RequiredArgCount { get; }

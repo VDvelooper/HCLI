@@ -1,4 +1,4 @@
-﻿using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
 using HCLI.Program.ModuleCore.Shared;
 
 namespace HCLI.Program.Core.Commands

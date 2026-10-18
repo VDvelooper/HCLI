@@ -1,4 +1,4 @@
-﻿using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
 using HCLI.Program.Core.Shared;
 
 namespace HCLI.Program.Core
@@ -14,8 +14,6 @@ namespace HCLI.Program.Core
             feedback = userInput.Command.Execute(userInput);
 
             ConsoleView.PresentFeedback(feedback);
-
-
 
             if (userInput.TryGetFlag(FlagID.Debug, out _))
             {

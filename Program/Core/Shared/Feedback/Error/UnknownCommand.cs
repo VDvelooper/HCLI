@@ -1,4 +1,4 @@
-﻿using HCLI.Program.Core.Abstractions;
+﻿using HCLI.Program.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
