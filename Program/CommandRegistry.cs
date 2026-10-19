@@ -3,11 +3,11 @@ using HCLI.Program.Core.Commands;
 
 namespace HCLI.Program
 {
-    public class CommandRegistry
+    internal class CommandRegistry
     {
-        public static Dictionary<string, ICommand> Commands;
+        internal static Dictionary<string, ICommand> Commands;
 
-        public CommandRegistry()
+        internal CommandRegistry()
         {
             CMD_Exit cmd_exit = new("exit", 0, 0, "Exits HCLI.");
             CMD_Help cmd_help = new("help", 0, 1, "Writes out all the base commands.");
@@ -25,7 +25,7 @@ namespace HCLI.Program
             };
         }
 
-        public static bool TryGetHCLICommand(string command, out ICommand? found)
+        internal static bool TryGetHCLICommand(string command, out ICommand? found)
         {
             found = Commands.Where(x=>x.Value.Syntax == command).Select(x => x.Value).FirstOrDefault();
             return found != null;
@@ -35,7 +35,7 @@ namespace HCLI.Program
         /// Search which includes only Module subcommands.
         /// </summary>
         /// <returns>Base command or Module command</returns>
-        public static bool TryGetModuleSubCommand(string command, out ICommand? found)
+        internal static bool TryGetModuleSubCommand(string command, out ICommand? found)
         {
             ModuleRegistry mr = Runtime.ModuleRegistry;
 
@@ -48,7 +48,7 @@ namespace HCLI.Program
         /// Search which includes Base Commands and Module subcommands.
         /// </summary>
         /// <returns>Base command or Module's subcommand</returns>
-        public static bool TryGetModuleCommand(string command, out ICommand? found)
+        internal static bool TryGetModuleCommand(string command, out ICommand? found)
         {
             ModuleRegistry mr = Runtime.ModuleRegistry;
 
@@ -57,11 +57,6 @@ namespace HCLI.Program
                 mr.TryGetModuleSubCommand(command, out found); 
 
             return found != null;
-        }
-        
-        public static bool IsThereEnoughArguments(List<string> args, int expectedArgsCount)
-        {
-            return args.Count == expectedArgsCount - 1;
         }
     }
 }

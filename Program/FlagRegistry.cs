@@ -2,7 +2,7 @@
 
 namespace HCLI.Program
 {
-    public class FlagRegistry
+    internal class FlagRegistry
     {
         public List<FlagDefinition> Flags;
 
