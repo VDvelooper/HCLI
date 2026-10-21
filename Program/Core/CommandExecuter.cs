@@ -5,7 +5,7 @@ namespace HCLI.Program.Core
 {
     public class CommandExecuter
     {
-        public static void ExecuteCommand(UserInput? userInput)
+        public void ExecuteCommand(UserInput? userInput)
         {
             if (userInput == null) return;
 
@@ -13,7 +13,7 @@ namespace HCLI.Program.Core
 
             feedback = userInput.Command.Execute(userInput);
 
-            ConsoleView.PresentFeedback(feedback);
+            Runtime.Services.ConsoleView.PresentFeedback(feedback);
 
             if (userInput.TryGetFlag(FlagID.Debug, out _))
             {

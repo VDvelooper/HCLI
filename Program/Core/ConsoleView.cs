@@ -4,7 +4,7 @@ namespace HCLI.Program.Core
 {
     public class ConsoleView
     {
-        public static void PresentFeedback(IFeedback feedback)
+        public void PresentFeedback(IFeedback feedback)
         {
             if (feedback.Silent) return;
 
@@ -47,7 +47,7 @@ namespace HCLI.Program.Core
             }
         }
 
-        public static void Message(string? message = null, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
+        public void Message(string? message = null, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
         {
             if (outputStyle != null) {
                 Console.ForegroundColor = outputStyle.ForegroundColor;
@@ -57,7 +57,7 @@ namespace HCLI.Program.Core
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
-        public static void Debug(string message)
+        public void Debug(string message)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.BackgroundColor = ConsoleColor.Black;
@@ -65,14 +65,14 @@ namespace HCLI.Program.Core
             Console.ResetColor();
             Console.WriteLine();
         }
-        public static void Warn(string message)
+        public void Warn(string message)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine(message);
             Console.ResetColor();
         }
-        public static void Error(string message)
+        public void Error(string message)
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.BackgroundColor = ConsoleColor.Black;
@@ -82,7 +82,7 @@ namespace HCLI.Program.Core
         }
 
 
-        public static string ReadUserInput(string senderName)
+        public string ReadUserInput(string senderName)
         {
             Message($"{senderName} > ", false);
             string? r = Console.ReadLine();

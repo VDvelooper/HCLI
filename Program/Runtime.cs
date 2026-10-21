@@ -8,10 +8,11 @@ namespace HCLI.Program
     internal class Runtime
     {
         // public services
-        public static CommandRegistry CommandRegistry { get; private set; }
-        public static Session.SessionData SessionData { get; private set; }
-        public static ModuleRegistry ModuleRegistry { get; private set; }
-        public static ConfigManager ConfigManager { get; private set; }
+        internal static CommandRegistry CommandRegistry { get; private set; }
+        internal static Session.SessionData SessionData { get; private set; }
+        internal static ModuleRegistry ModuleRegistry { get; private set; }
+        internal static ConfigManager ConfigManager { get; private set; }
+        internal static Services Services { get; private set; }
 
         private static void Main(string[] args)
         {
@@ -60,12 +61,12 @@ namespace HCLI.Program
         /// </summary>
         private static void SetDefault()
         {
-            CommandRegistry = new CommandRegistry();
-            SessionData = new Session.SessionData();
-            ConfigManager = new ConfigManager();
+            var CommandRegistry = new CommandRegistry();
+            var SessionData = new Session.SessionData();
+            var ConfigManager = new ConfigManager();
+            var ModuleRegistry = new ModuleRegistry();
 
-            ModuleRegistry = new ModuleRegistry();
-
+            Services = new Services();
 
             SessionData.Running = true;
         }

@@ -13,8 +13,18 @@ namespace HCLI.Program.ModuleCore.Shared
         public List<ICommand> BaseCommands { get; private set; }
         public List<ICommand> SubCommands { get; private set; }
 
-        public bool _isSeparateMode;
-        protected bool _isSeparateModeRunning;
+
+        public Services Services { get; private set; }
+        public string ModuleDllStoragePath // this needs to be centered in one class.
+                                           // there is one more of this type of field in ModuleRegistry.cs
+        {
+            get { return @$"{ConfigManager.ConfigData.MainDirectoryPath}\ModuleData"; }
+        }
+
+
+
+        private bool _isSeparateMode;
+        private bool _isSeparateModeRunning;
 
         public bool IsSeparateMode
         {
@@ -28,18 +38,20 @@ namespace HCLI.Program.ModuleCore.Shared
         }
 
         
-        public static string MODULE_DATA_DIR_PATH = @$"{ConfigManager.ConfigData.MainDirectoryPath}\ModuleData";
 
         
-        public ModuleBase(string moduleName, string moduleCommand, bool separateMode)
+        public ModuleBase(string moduleName, string moduleCommand, bool separateMode, Services services)
         {
-            _isSeparateMode = separateMode;
-            IsSeparateModeRunning = false;
-
+            Services = services;
             ModuleName = moduleName;
             ModuleCommand = moduleCommand;
 
             SubCommands = new List<ICommand>();
+
+
+            _isSeparateMode = separateMode;
+            IsSeparateModeRunning = false;
+
 
             CMD_Exit cmd_exit = new CMD_Exit("exit", 0, 0, "Exits the Module if it is a seperate program like module.", this);
             CMD_Help cmd_help = new CMD_Help("help", 0, 1, "Writes out all avalible commands in the current module.", this);
@@ -52,8 +64,8 @@ namespace HCLI.Program.ModuleCore.Shared
                 cmd_moduleExecute
             };
 
-            if (!Path.Exists(MODULE_DATA_DIR_PATH))
-                Directory.CreateDirectory(MODULE_DATA_DIR_PATH);
+            if (!Path.Exists(ModuleDllStoragePath))
+                Directory.CreateDirectory(ModuleDllStoragePath);
         }
 
         /// <summary>
@@ -96,7 +108,7 @@ namespace HCLI.Program.ModuleCore.Shared
 
         private void PrintDirectory(UserInput _)
         {
-            ConsoleView.Message($"Module data directory: {MODULE_DATA_DIR_PATH}");
+            ConsoleView.Message($"Module data directory: {ModuleDllStoragePath}");
         }
     }
 }

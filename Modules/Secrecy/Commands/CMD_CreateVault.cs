@@ -1,4 +1,5 @@
-﻿using HCLI.Program.Abstractions;
+﻿using HCLI.Program;
+using HCLI.Program.Abstractions;
 using HCLI.Program.Core;
 using HCLI.Program.Core.Shared.Feedback.Error;
 using HCLI.Program.Core.Shared.Feedback.Errors;
@@ -53,13 +54,13 @@ namespace HCLI.Modules.Secrecy.Commands
 
             if (masterKeyTest != masterKey)
             {
-                ConsoleView.PresentFeedback(new UnkownAnwser("Incorrect master password."));
-                ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
-                string anwser = ConsoleView.ReadUserInput("Secrecy");
+                Runtime.Services.ConsoleView.PresentFeedback(new UnkownAnwser("Incorrect master password."));
+                Runtime.Services.ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
+                string anwser = Runtime.Services.ConsoleView.ReadUserInput("Secrecy");
 
                 while (anwser.ToLower() != "y" && anwser.ToLower() != "n")
                 {
-                    ConsoleView.PresentFeedback(new UnkownAnwser("Unknown anwser. Possible anwsers: Y/N"));
+                    CRuntime.Services.ConsoleView.PresentFeedback(new UnkownAnwser("Unknown anwser. Possible anwsers: Y/N"));
                     ConsoleView.Message($"Do you wish to create a new one? (Y/N)");
                     anwser = ConsoleView.ReadUserInput("Secrecy");
                 }
