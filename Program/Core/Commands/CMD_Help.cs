@@ -1,5 +1,5 @@
-﻿using HCLI.Program.Abstractions;
-using HCLI.Program.ModuleCore.Shared;
+﻿using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -22,11 +22,10 @@ namespace HCLI.Program.Core.Commands
 
         public IFeedback? Run(UserInput userInput) 
         {
-            Console.WriteLine($"\nexit -> Exits HCLI.\n" +
-             $"echo -> Outputs the text followed by the 'echo' keyword. [1th arg: the text itself]\n" +
-             $"clear -> Clears the console. [0 arguments]\n" +
-             $"help -> Writes out all the base commands. [0 arguments]\n" +
-             $"lam -> Writes out all the avalible modules. [0 arguments]\n");
+            foreach (KeyValuePair<string, ICommand> command in Runtime.CommandRegistry.Commands)
+            {
+                Runtime.ConsoleView.Message($"{command.Value.Syntax} - {command.Value.Description}");
+            }
 
             return null;
         }

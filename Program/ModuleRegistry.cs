@@ -1,72 +1,125 @@
-﻿using HCLI.Modules.ExampleModule;
-using HCLI.Modules.Secrecy;
-using HCLI.Program.Abstractions;
-using HCLI.Program.Core.Configuration;
-using HCLI.Program.ModuleCore.Shared;
-using System.Reflection;
+﻿using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback.Error;
+using ModuleContracts.Feedback.Warning;
+
+using System.Runtime.Loader;
 
 namespace HCLI.Program
 {
-    public class ModuleRegistry
+    internal class ModuleRegistry
     {
-        internal List<ModuleBase> AVALIBLE_MODULES; // szeretném hogy lehessen külön kiválasztani, hogy milyen modulok legyenek betöltve (1)
-        internal List<ModuleBase> FOUND_MODULES;
+        internal List<AssemblyLoadContext> LoadedContexts { get; private set; } = new();
+        /// <summary>
+        /// Key: Module's main class, Value: dll file's name
+        /// </summary>
+        internal Dictionary<Type, string> DetectedModules { get; private set; } = new();
+        internal List<ModuleBase> LoadedModules { get; private set; } = new();
 
-        public string ModuleDllStoragePath
+
+        internal List<string> ModuleToLoadAtStart { get; }
+        internal string ModuleDllStoragePath { get; } // replace it to an outside %appdata% folder?
+        
+        internal ModuleRegistry()
         {
-            get { return @$"{ConfigManager.ConfigData.MainDirectoryPath}\ModuleData"; }
+            ModuleDllStoragePath = @$"{Runtime.ConfigManager.MainDirectoryPath}\ModuleDlls";
+
+            if (!Path.Exists(ModuleDllStoragePath))
+                Directory.CreateDirectory(ModuleDllStoragePath);
+
+            ModuleToLoadAtStart = Runtime.ConfigManager.ConfigData.ModuleToLoadAtStart;
+
+            DetectModules();
         }
 
-        public ModuleRegistry()
+        internal void DetectModules()
         {
-            // -- base object initialization -- //    <- (1) Ezeket csak akkor inicializálnánk, ha a felhasználó kiválasztja (mondjuk külső forrásból) a modult betöltésre
-            CLASS_EXAMPLE = new ExampleModule(true);
-            CLASS_SECRECY = new SecrecyModule(true);
-            
-            AVALIBLE_MODULES = new();
-            FOUND_MODULES = new();
+            Type moduleBaseClass = typeof(ModuleBase);
 
-            AVALIBLE_MODULES.Add(CLASS_SECRECY); // (1) Akkor adjuk hozzá amikor a felhasználó kijelöli azt implementációra
-        }
+            List<string> possibleDllPaths = System.IO.Directory.GetFiles(ModuleDllStoragePath, "*.dll").ToList();
 
-        public void FindModules()
-        {
-            Type targetClass = typeof(ModuleBase);
-            Type moduleCoreType;
 
-            List<string> possibleDics = Directory.GetDirectories(ModuleDllStoragePath).ToList();
-
-            List<Type> FoundTypes = new();
-            List<>
-
-            foreach (string possibleDic in possibleDics)
+            foreach (string possibleAbsDllPath in possibleDllPaths)
             {
-                Type[] moduleDllTypes = Assembly.LoadFrom(possibleDic).GetTypes();
+                try
+                {
+                    Console.Write($"possibleAbsDllPath=");
+                    Console.WriteLine(possibleAbsDllPath);
 
-                Type? foundModuleCore = moduleDllTypes.Where(type => 
-                !type.IsAbstract && 
-                !type.IsInterface && 
-                type.IsSubclassOf(targetClass) && 
-                !FoundTypes.Contains(type))
-                .FirstOrDefault();
+                    AssemblyLoadContext mdlCtxt = new AssemblyLoadContext(possibleAbsDllPath, true); // moduleContext
 
-                if (foundModuleCore == null)
-                    continue;
+                    Type[] moduleDllTypes = mdlCtxt.LoadFromAssemblyPath(possibleAbsDllPath).GetTypes();
 
-                dynamic? found = Activator.CreateInstance(foundModuleCore, true, Runtime.Services); // zzz majd a ModuleBase konstruktor param.-ben csak a Services-t keljen megadni!
+                    Type? foundMdlType = moduleDllTypes.Where(type =>
+                    !type.IsAbstract &&
+                    !type.IsInterface &&
+                    type.IsSubclassOf(moduleBaseClass) &&
+                    !DetectedModules.ContainsKey(type))
+                    .First();
+
+                    if (foundMdlType == null)
+                    {
+                        mdlCtxt.Unload();
+                        continue;
+                    }
 
 
+                    string correctCtxtName = Path.GetFileNameWithoutExtension(possibleAbsDllPath);
 
-                moduleCoreType = foundModuleCore;
-                FoundTypes.Add(foundModuleCore);
+                    // mert -> a context neve ne az egész path legyen
+                    mdlCtxt.Unload();
+
+                    mdlCtxt = new AssemblyLoadContext(correctCtxtName, true);
+
+                    mdlCtxt.LoadFromAssemblyPath(possibleAbsDllPath);
+
+
+                    LoadedContexts.Add(mdlCtxt);
+                    DetectedModules.Add(foundMdlType, possibleAbsDllPath); // ModuleBase will store the abs path for, whatever. Why not scenario
+
+                }
+                catch (Exception ex)
+                {
+                    Runtime.ContractsForModules.ConsoleViewContract.FatalError($"{ex.Message} (DetectModules())");
+                }
             }
         }
 
-        public bool TryGetModuleSubCommand(string command, out ICommand? found)
+        internal ModuleBase? InstanciateModule(Type foundModuleType)
+        {
+            ModuleBase? moduleObject = Activator.CreateInstance(foundModuleType, Runtime.ContractsForModules, DetectedModules[foundModuleType]) as ModuleBase;
+
+            if (moduleObject == null)
+            {
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new ValueWasNull(null, null, false));
+                Runtime.ContractsForModules.ConsoleViewContract.Error($"The instanciation of module {foundModuleType.FullName} is not possible, because it is already loaded.");
+                return null;
+            }
+
+            if (LoadedModules.Contains(moduleObject))
+            {
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new AlreadyExists(null, null, false));
+                Runtime.ContractsForModules.ConsoleViewContract.Warn($"The instanciation of module {foundModuleType.FullName} is not possible, because it is already loaded.");
+                return null;
+            }
+            
+            if (moduleObject == null)
+            {
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new NotFound(null, null, false));
+                Runtime.ContractsForModules.ConsoleViewContract.FatalError($"The instanciation of module {foundModuleType.FullName} have returned null. (NotFound feedback.)");
+                return null;
+            }
+
+            LoadedModules.Add(moduleObject);
+
+            return moduleObject;
+        }
+
+
+        internal bool TryGetModuleSubCommand(string command, out ICommand? found)
         {
             found = null;
 
-            foreach (ModuleBase module in AVALIBLE_MODULES)
+            foreach (ModuleBase module in LoadedModules)
             {
                 if (!module.SubCommands.Where(x => x.Syntax == command).Any()) 
                     continue;
@@ -78,11 +131,11 @@ namespace HCLI.Program
             return false;
         }
 
-        public bool TryGetBaseCommand(string command, out ICommand? found)
+        internal bool TryGetBaseCommand(string command, out ICommand? found)
         {
             found = null;
 
-            foreach (ModuleBase module in AVALIBLE_MODULES)
+            foreach (ModuleBase module in LoadedModules)
             {
                 found = module.BaseCommands.Where(c => c.Syntax == command).FirstOrDefault();
 
@@ -95,11 +148,5 @@ namespace HCLI.Program
 
             return found != null;
         }
-        
-        // -- Source Sets -- //
-
-        private readonly ExampleModule CLASS_EXAMPLE;
-        private readonly SecrecyModule CLASS_SECRECY;
-
     }
 }

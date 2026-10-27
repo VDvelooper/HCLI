@@ -1,5 +1,6 @@
-﻿using HCLI.Program.Abstractions;
-using HCLI.Program.ModuleCore.Shared;
+﻿using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback;
+using ModuleContracts.Feedback.Error;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -11,8 +12,16 @@ namespace HCLI.Program.Core.Commands
         public string Description { get; }
         public ModuleBase? ParentModule { get; }
 
-        public CMD_Exit(string syntax, int requiredArgCount, int optionalArgCount, string description, ModuleBase? parentModule = null)
+        public CMD_Exit(string syntax, int requiredArgCount, int optionalArgCount, string description, object senderForVerification, ModuleBase? parentModule = null)
         {
+            if (senderForVerification is not Program.CommandRegistry)
+            {
+                var ex = new InternalValidationExeption("Program.Core.Commands.CMD_Exit class was unauthorized to be instanciated.", null, true);
+                Runtime.ConsoleView.PresentFeedback(ex);
+                Runtime.ConsoleView.FatalError(ex.Description!);
+                return;
+            }
+
             Syntax = syntax;
             RequiredArgCount = requiredArgCount;
             OptionalArgCount = optionalArgCount;
@@ -22,7 +31,7 @@ namespace HCLI.Program.Core.Commands
 
         public IFeedback? Run(UserInput userInput)
         {
-            Runtime.SessionData.Running = false;
+            Runtime.ValidateExitCommand(this);
             return null;
         }
     }

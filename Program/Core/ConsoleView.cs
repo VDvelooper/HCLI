@@ -1,8 +1,10 @@
-﻿using HCLI.Program.Abstractions;
+﻿using ModuleContracts.ServiceContracts;
+using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback;
 
 namespace HCLI.Program.Core
 {
-    public class ConsoleView
+    internal class ConsoleView : IConsoleViewContract
     {
         public void PresentFeedback(IFeedback feedback)
         {
@@ -10,7 +12,7 @@ namespace HCLI.Program.Core
 
             switch (feedback.ResultType)
             {
-                case Shared.Feedback.FeedbackType.Expected:
+                case FeedbackType.Expected:
 
                     if (feedback.ConsoleOutputOverride != null)
                         Message(feedback.ConsoleOutputOverride, true, feedback.ConsoleOutputStyle);
@@ -19,25 +21,35 @@ namespace HCLI.Program.Core
                     break;
 
 
-                case Shared.Feedback.FeedbackType.Warning:
+                case FeedbackType.Warning:
 
                     if (feedback.Description != null)
                         Warn($"{feedback.Description} : {feedback.FeedbackID}");
                     else if (feedback.ConsoleOutputOverride != null)
-                        Warn($"{feedback.ConsoleOutputOverride} (origin: {feedback.FeedbackID})");
+                        Warn($"{feedback.ConsoleOutputOverride} ({feedback.FeedbackID})");
                     else
                         Warn($"{feedback.FeedbackID}");
                     break;
 
 
-                case Shared.Feedback.FeedbackType.Error:
+                case FeedbackType.Error:
 
                     if (feedback.Description != null)
+                    {
                         Error($"{feedback.Description} : {feedback.FeedbackID}");
+                        Error($"Source: {feedback.Details.SourceName}\n" +
+                            $"Source path: {feedback.Details.SourceFilePath}\n" +
+                            $"Source line: {feedback.Details.SourceLineNumber}");
+                    }
                     else if (feedback.ConsoleOutputOverride != null)
-                        Error($"{feedback.ConsoleOutputOverride} (origin: {feedback.FeedbackID})");
+                        Error($"{feedback.ConsoleOutputOverride} ({feedback.FeedbackID})");
                     else
+                    {
                         Error($"{feedback.FeedbackID}");
+                        Error($"Source: {feedback.Details.SourceName}\n" +
+                            $"Source path: {feedback.Details.SourceFilePath}\n" +
+                            $"Source line: {feedback.Details.SourceLineNumber}");
+                    }
                     break;
 
 
@@ -57,30 +69,38 @@ namespace HCLI.Program.Core
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
-        public void Debug(string message)
+        public void Debug(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine(message);
             Console.ResetColor();
-            Console.WriteLine();
+            if (newLine) Console.WriteLine();
         }
-        public void Warn(string message)
+        public void Warn(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine(message);
             Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
-        public void Error(string message)
+        public void Error(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine(message);
             Console.ResetColor();
-            Console.WriteLine();
+            if (newLine) Console.WriteLine();
         }
-
+        public void FatalError(string message, bool newLine = true)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(message);
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
+        }
 
         public string ReadUserInput(string senderName)
         {

@@ -1,5 +1,5 @@
-﻿using HCLI.Program.Abstractions;
-using HCLI.Program.ModuleCore.Shared;
+﻿using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -22,7 +22,7 @@ namespace HCLI.Program.Core.Commands
 
         public IFeedback? Run(UserInput userInput)
         {
-            ConsoleView.Message(userInput.RequiredArgs[0]);
+            Runtime.ConsoleView.Message(userInput.RequiredArgs[0]);
             return null;
         }
     }

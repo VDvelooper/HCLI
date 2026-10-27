@@ -1,9 +1,10 @@
-﻿using HCLI.Program.Abstractions;
-using HCLI.Program.Core.Shared;
+﻿using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback;
+using ModuleContracts.ServiceContracts;
 
 namespace HCLI.Program.Core
 {
-    public class CommandExecuter
+    public class CommandExecuter : ICommandExecuterContract
     {
         public void ExecuteCommand(UserInput? userInput)
         {
@@ -13,21 +14,26 @@ namespace HCLI.Program.Core
 
             feedback = userInput.Command.Execute(userInput);
 
-            Runtime.Services.ConsoleView.PresentFeedback(feedback);
+            Runtime.ConsoleView.PresentFeedback(feedback);
+
+
+            Runtime.ConsoleView.Message();
+            
 
             if (userInput.TryGetFlag(FlagID.Debug, out _))
             {
-                ConsoleView.Message(
+                Runtime.ContractsForModules.ConsoleViewContract.Debug(
                     $"Debug details:\n" +
                     $"Full command: {userInput.Raw}\n" +
                     $"Lexed command: {userInput.Command}\n" +
                     $"Required args count: {userInput.RequiredArgs.Count}\n" +
                     $"Optional args count: {userInput.OptionalArgs.Count}"
                 );
-                ConsoleView.Message("Found flags:");
-                userInput.DetectedFlags.ForEach(flag => ConsoleView.Message($"  {flag.FlagDefinition.Name}"));
-                ConsoleView.Message();
-            }
+                Runtime.ContractsForModules.ConsoleViewContract.Debug("Found flags:");
+                userInput.DetectedFlags.ForEach(flag => Runtime.ContractsForModules.ConsoleViewContract.Debug($"  {flag.FlagDefinition.Name}"));
+
+                Runtime.ConsoleView.Message();
+            }            
         }
     }
 }
