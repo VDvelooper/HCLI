@@ -30,7 +30,7 @@ namespace HCLI.Program.Core.Commands
 
             foreach (ModuleBase module in Runtime.ModuleRegistry.LoadedModules)
             {
-                Runtime.ContractsForModules.ConsoleViewContract.Message(module.ModuleName);
+                Runtime.ContractsForModules.ConsoleViewContract.Message($"   {module.ModuleName} - {module.ModuleCommand}");
             }
             return null;
         }

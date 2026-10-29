@@ -2,7 +2,7 @@
 
 using HCLI.Program.Core;
 using HCLI.Program.Core.Configuration;
-
+using HCLI.Program.Core.Console;
 using ModuleContracts;
 using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback.Error;

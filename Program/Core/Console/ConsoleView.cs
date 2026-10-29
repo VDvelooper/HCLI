@@ -1,8 +1,10 @@
-﻿using ModuleContracts.ServiceContracts;
+﻿using System;
+using ModuleContracts.ServiceContracts;
 using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback;
+using ModuleContracts.Console.Output.Tables;
 
-namespace HCLI.Program.Core
+namespace HCLI.Program.Core.Console
 {
     internal class ConsoleView : IConsoleViewContract
     {
@@ -62,55 +64,90 @@ namespace HCLI.Program.Core
         public void Message(string? message = null, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
         {
             if (outputStyle != null) {
-                Console.ForegroundColor = outputStyle.ForegroundColor;
-                Console.BackgroundColor = outputStyle.BackgroundColor;
+                System.Console.ForegroundColor = outputStyle.ForegroundColor;
+                System.Console.BackgroundColor = outputStyle.BackgroundColor;
             }
-            Console.Write(message == null ? "" : message);
-            Console.ResetColor();
-            if (newLine) Console.WriteLine();
+            System.Console.Write(message == null ? "" : message);
+            System.Console.ResetColor();
+            if (newLine) System.Console.WriteLine();
         }
         public void Debug(string message, bool newLine = true)
         {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine(message);
-            Console.ResetColor();
-            if (newLine) Console.WriteLine();
+            System.Console.ForegroundColor = ConsoleColor.DarkGray;
+            System.Console.BackgroundColor = ConsoleColor.Black;
+            System.Console.WriteLine(message);
+            System.Console.ResetColor();
+            if (newLine) System.Console.WriteLine();
+        }
+        public void Debug(ConsoleTable table)
+        {
+            System.Console.ForegroundColor = ConsoleColor.DarkGray;
+            System.Console.BackgroundColor = ConsoleColor.Black;
+
+            if (table.ContainsHeader)
+            {
+                for (int headerItem = 0; headerItem < table.Header.Length; headerItem++)
+                {
+
+                }
+            }
+
+            for (int row = 0; row < table.RowCount; row++)
+            {
+                for (int col = 0; col < table.RowCount; col++)
+                {
+                    (int, int) position = (row, col);
+
+                    
+
+                    Runtime.ConsoleView.Message($"{table.Body[]}");
+
+                }
+            }
+            
+            System.Console.ResetColor();
+            if (newLine) System.Console.WriteLine();
         }
         public void Warn(string message, bool newLine = true)
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine(message);
-            Console.ResetColor();
-            if (newLine) Console.WriteLine();
+            System.Console.ForegroundColor = ConsoleColor.DarkYellow;
+            System.Console.BackgroundColor = ConsoleColor.Black;
+            System.Console.WriteLine(message);
+            System.Console.ResetColor();
+            if (newLine) System.Console.WriteLine();
         }
         public void Error(string message, bool newLine = true)
         {
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine(message);
-            Console.ResetColor();
-            if (newLine) Console.WriteLine();
+            System.Console.ForegroundColor = ConsoleColor.DarkRed;
+            System.Console.BackgroundColor = ConsoleColor.Black;
+            System.Console.WriteLine(message);
+            System.Console.ResetColor();
+            if (newLine) System.Console.WriteLine();
         }
         public void FatalError(string message, bool newLine = true)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(message);
-            Console.ResetColor();
-            if (newLine) Console.WriteLine();
+            System.Console.ForegroundColor = ConsoleColor.White;
+            System.Console.BackgroundColor = ConsoleColor.DarkRed;
+            System.Console.WriteLine(message);
+            System.Console.ResetColor();
+            if (newLine) System.Console.WriteLine();
         }
 
         public string ReadUserInput(string senderName)
         {
             Message($"{senderName} > ", false);
-            string? r = Console.ReadLine();
+            string? r = System.Console.ReadLine();
 
             Message();
 
             return r ?? string.Empty;
         }
 
+
+        public ConsoleTable CreateTable(string name, int rows, int colums, bool header)
+        {
+            ConsoleTable table = new ConsoleTable(name, rows, colums, true);
+            return table;
+        }
     }
 }

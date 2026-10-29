@@ -27,7 +27,7 @@ namespace HCLI.Program
                 Directory.CreateDirectory(ModuleDllStoragePath);
 
             ModuleToLoadAtStart = Runtime.ConfigManager.ConfigData.ModuleToLoadAtStart;
-
+            
             DetectModules();
         }
 
