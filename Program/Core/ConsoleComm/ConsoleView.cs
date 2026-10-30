@@ -1,10 +1,9 @@
-﻿using System;
-using ModuleContracts.ServiceContracts;
+﻿using ModuleContracts.ServiceContracts;
 using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback;
 using ModuleContracts.Console.Output.Tables;
 
-namespace HCLI.Program.Core.Console
+namespace HCLI.Program.Core.ConsoleComm
 {
     internal class ConsoleView : IConsoleViewContract
     {
@@ -64,79 +63,96 @@ namespace HCLI.Program.Core.Console
         public void Message(string? message = null, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
         {
             if (outputStyle != null) {
-                System.Console.ForegroundColor = outputStyle.ForegroundColor;
-                System.Console.BackgroundColor = outputStyle.BackgroundColor;
+                Console.ForegroundColor = outputStyle.ForegroundColor;
+                Console.BackgroundColor = outputStyle.BackgroundColor;
             }
-            System.Console.Write(message == null ? "" : message);
-            System.Console.ResetColor();
-            if (newLine) System.Console.WriteLine();
+            Console.Write(message == null ? "" : message);
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
         public void Debug(string message, bool newLine = true)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkGray;
-            System.Console.BackgroundColor = ConsoleColor.Black;
-            System.Console.WriteLine(message);
-            System.Console.ResetColor();
-            if (newLine) System.Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(message);
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
         public void Debug(ConsoleTable table)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkGray;
-            System.Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.DarkGray;
+
+            string padding = new string(' ', table.HorizontalPadding);
 
             if (table.ContainsHeader)
             {
-                for (int headerItem = 0; headerItem < table.Header.Length; headerItem++)
+                for (int headerItem = 0; headerItem < table.Header.Count; headerItem++)
                 {
+                    string currentItem = table.Header[headerItem];
 
+                    if (headerItem == 0)
+                    {
+                        Console.Write($"|{padding}{currentItem}{padding}|");
+                        continue;
+                    }
+                    Console.WriteLine($"{padding}{currentItem}{padding}|");
                 }
+                Console.WriteLine($"|{new string('-', table.TableWidth - 2)}|");
+            }
+            else
+            {
+                Console.WriteLine($"|{new string('-', table.TableWidth)/* - (table.RowCount * table.HorizontalPadding * 2)*/}|");
             }
 
             for (int row = 0; row < table.RowCount; row++)
             {
-                for (int col = 0; col < table.RowCount; col++)
+                for (int col = 0; col < table.ColCount; col++)
                 {
-                    (int, int) position = (row, col);
+                    string currentItem = table.Body[(row, col)];
 
-                    
-
-                    Runtime.ConsoleView.Message($"{table.Body[]}");
+                    if (col == 0)
+                    {
+                        Console.Write($"|{padding}{currentItem}{padding}|");
+                        continue;
+                    }
+                    Console.Write($"{padding}{currentItem}{padding}|");
 
                 }
+                Console.WriteLine($"\n|{new string('-', table.TableWidth - 2)}|");
             }
             
-            System.Console.ResetColor();
-            if (newLine) System.Console.WriteLine();
+            Console.ResetColor();
         }
         public void Warn(string message, bool newLine = true)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkYellow;
-            System.Console.BackgroundColor = ConsoleColor.Black;
-            System.Console.WriteLine(message);
-            System.Console.ResetColor();
-            if (newLine) System.Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(message);
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
         public void Error(string message, bool newLine = true)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkRed;
-            System.Console.BackgroundColor = ConsoleColor.Black;
-            System.Console.WriteLine(message);
-            System.Console.ResetColor();
-            if (newLine) System.Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(message);
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
         public void FatalError(string message, bool newLine = true)
         {
-            System.Console.ForegroundColor = ConsoleColor.White;
-            System.Console.BackgroundColor = ConsoleColor.DarkRed;
-            System.Console.WriteLine(message);
-            System.Console.ResetColor();
-            if (newLine) System.Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(message);
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
 
         public string ReadUserInput(string senderName)
         {
             Message($"{senderName} > ", false);
-            string? r = System.Console.ReadLine();
+            string? r = Console.ReadLine();
 
             Message();
 
