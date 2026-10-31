@@ -17,29 +17,6 @@ namespace HCLI.Program
 
             InstanciateCore();
 
-            ModuleContracts.Console.Output.Tables.ConsoleTable t = new ModuleContracts.Console.Output.Tables.ConsoleTable("e", 2, 3, true);
-            t.AddHeaderContent("Szám");
-            t.AddHeaderContent("Szám");
-            t.AddHeaderContent("Szám");
-            t.AddBodyContent("1");
-            t.AddBodyContent("2");
-            t.AddBodyContent("3");
-            t.AddBodyContent("4");
-            t.AddBodyContent("5");
-            t.AddBodyContent("6");
-
-            Console.WriteLine(t.GetUncompleteIndex());
-
-            foreach (var p in t.Body)
-            {
-                if (string.IsNullOrEmpty(p.Value))
-                    Console.WriteLine("body empty");
-                else
-                    Console.WriteLine(p.Value);
-            }
-
-            ConsoleView.Debug(t);
-
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
             ConfigManager.LoadConfig();

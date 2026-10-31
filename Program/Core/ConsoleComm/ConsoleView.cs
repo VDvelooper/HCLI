@@ -66,80 +66,88 @@ namespace HCLI.Program.Core.ConsoleComm
                 Console.ForegroundColor = outputStyle.ForegroundColor;
                 Console.BackgroundColor = outputStyle.BackgroundColor;
             }
+
             Console.Write(message == null ? "" : message);
+
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
+        public void Message(ConsoleTable table, bool newLine = true, ConsoleOutputStyle? outputStyle = null)
+        {
+            if (outputStyle != null) {
+                Console.ForegroundColor = outputStyle.ForegroundColor;
+                Console.BackgroundColor = outputStyle.BackgroundColor;
+            }
+
+            PresentTable(table);
+
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
+        }
+
         public void Debug(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.BackgroundColor = ConsoleColor.Black;
+
             Console.WriteLine(message);
+
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
-        public void Debug(ConsoleTable table)
+        public void Debug(ConsoleTable table, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.DarkGray;
 
-            string padding = new string(' ', table.HorizontalPadding);
+            PresentTable(table);
 
-            if (table.ContainsHeader)
-            {
-                for (int headerItem = 0; headerItem < table.Header.Count; headerItem++)
-                {
-                    string currentItem = table.Header[headerItem];
-
-                    if (headerItem == 0)
-                    {
-                        Console.Write($"|{padding}{currentItem}{padding}|");
-                        continue;
-                    }
-                    Console.WriteLine($"{padding}{currentItem}{padding}|");
-                }
-                Console.WriteLine($"|{new string('-', table.TableWidth - 2)}|");
-            }
-            else
-            {
-                Console.WriteLine($"|{new string('-', table.TableWidth)/* - (table.RowCount * table.HorizontalPadding * 2)*/}|");
-            }
-
-            for (int row = 0; row < table.RowCount; row++)
-            {
-                for (int col = 0; col < table.ColCount; col++)
-                {
-                    string currentItem = table.Body[(row, col)];
-
-                    if (col == 0)
-                    {
-                        Console.Write($"|{padding}{currentItem}{padding}|");
-                        continue;
-                    }
-                    Console.Write($"{padding}{currentItem}{padding}|");
-
-                }
-                Console.WriteLine($"\n|{new string('-', table.TableWidth - 2)}|");
-            }
-            
             Console.ResetColor();
+            if (newLine) Console.WriteLine();
         }
+
         public void Warn(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.BackgroundColor = ConsoleColor.Black;
+
             Console.WriteLine(message);
+
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
+        public void Warn(ConsoleTable table, bool newLine = true)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.BackgroundColor = ConsoleColor.Black;
+
+            PresentTable(table);
+
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
+        }
+
         public void Error(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.BackgroundColor = ConsoleColor.Black;
+
             Console.WriteLine(message);
+
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
+        public void Error(ConsoleTable table, bool newLine = true)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.BackgroundColor = ConsoleColor.Black;
+
+            PresentTable(table);
+
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
+        }
+
         public void FatalError(string message, bool newLine = true)
         {
             Console.ForegroundColor = ConsoleColor.White;
@@ -148,6 +156,17 @@ namespace HCLI.Program.Core.ConsoleComm
             Console.ResetColor();
             if (newLine) Console.WriteLine();
         }
+        public void FatalError(ConsoleTable table, bool newLine = true)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+
+            PresentTable(table);
+
+            Console.ResetColor();
+            if (newLine) Console.WriteLine();
+        }
+
 
         public string ReadUserInput(string senderName)
         {
@@ -160,10 +179,79 @@ namespace HCLI.Program.Core.ConsoleComm
         }
 
 
-        public ConsoleTable CreateTable(string name, int rows, int colums, bool header)
+        public ConsoleTable CreateTable(int rows, int colums, bool header)
         {
-            ConsoleTable table = new ConsoleTable(name, rows, colums, true);
+            ConsoleTable table = new ConsoleTable(rows, colums, true);
             return table;
+        }
+
+        private void PresentTable(ConsoleTable table)
+        {
+            string padding = new string(' ', table.HorizontalPadding);
+
+            Console.WriteLine($"|{new string('-', table.TableWidth)}|");
+            for (int row = 0; row < table.RowCount; row++)
+            {
+                if (table.IsRowEmpty(row)) continue;
+
+                for (int col = 0; col < table.ColCount; col++)
+                {
+                    padding = new string(' ', table.HorizontalPadding);
+
+                    string currentItem = table.Body[(row, col)];
+
+                    int maxItemLength = table.GetColMaxItemLength(col);
+
+                    if (col == 0)
+                    {
+                        if (currentItem.Length == maxItemLength)
+                        {
+                            Console.Write($"|{currentItem}|");
+                            continue;
+                        }
+
+                        int remainingSpaceToPlace = maxItemLength - currentItem.Length;
+
+                        if (remainingSpaceToPlace % 2 == 0)
+                        {
+                            padding = new string(' ', table.HorizontalPadding + remainingSpaceToPlace / 2);
+                            Console.Write($"|{padding}{currentItem}{padding}|");
+                        }
+                        else
+                        {
+                            padding = new string(' ', table.HorizontalPadding + remainingSpaceToPlace % 2);
+                            string extraPadding = new string(' ', remainingSpaceToPlace - remainingSpaceToPlace % 2);
+                            Console.Write($"|{padding}{currentItem}{extraPadding}|");
+                        }
+
+                        continue;
+                    }
+                    else
+                    {
+                        if (currentItem.Length == maxItemLength)
+                        {
+                            Console.Write($"{currentItem}|");
+                            continue;
+                        }
+
+                        int remainingSpaceToPlace = maxItemLength - currentItem.Length;
+
+                        if (remainingSpaceToPlace % 2 == 0)
+                        {
+                            padding = new string(' ', table.HorizontalPadding + remainingSpaceToPlace / 2);
+                            Console.Write($"{padding}{currentItem}{padding}|");
+                        }
+                        else
+                        {
+                            padding = new string(' ', table.HorizontalPadding + remainingSpaceToPlace % 2);
+                            string extraPadding = new string(' ', remainingSpaceToPlace - remainingSpaceToPlace % 2);
+                            Console.Write($"{padding}{currentItem}{extraPadding}|");
+                        }
+                    }
+
+                }
+                Console.WriteLine($"\n|{new string('-', table.TableWidth)}|");
+            }
         }
     }
 }
