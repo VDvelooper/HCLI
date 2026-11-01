@@ -1,23 +1,21 @@
-﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.Core.Shared;
-using HCLI.Program.Core.Shared.Feedback.Error;
-using HCLI.Program.Core.Shared.Feedback.Errors;
-using HCLI.Program.Core.Shared.Feedback.Warning;
-using HCLI.Program.ModuleCore.Shared;
+﻿using ModuleContracts.ServiceContracts;
+using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback.Error;
+using ModuleContracts.Feedback.Warning;
 
 namespace HCLI.Program.Core
 {
-    public class CommandParser
+    public class CommandParser : ICommandParserContract
     {
         private static readonly Lexer _lexer = new Lexer();
         private static readonly FlagRegistry _flagRegistry = new FlagRegistry();
 
-        public static UserInput? Parse(string? rawInput)
+        internal UserInput? Parse(string? raw)
         {
-            if (string.IsNullOrEmpty(rawInput)) 
+            if (string.IsNullOrEmpty(raw)) 
                 return null;
 
-            List<string> tokens = _lexer.Tokenize(rawInput);
+            List<string> tokens = _lexer.Tokenize(raw);
 
             if (tokens.Count == 0) {
                 return null;
@@ -37,27 +35,30 @@ namespace HCLI.Program.Core
 
 
 
-            if (CommandRegistry.TryGetHCLICommand(rawCommand, out ICommand? foundHCLICommand) && foundHCLICommand != null)
+            if (Runtime.CommandRegistry.TryGetHCLICommand(rawCommand, out ICommand? foundHCLICommand) && foundHCLICommand != null)
             {
                 _reqArgsRemain = foundHCLICommand.RequiredArgCount;
                 _optArgsRemain = foundHCLICommand.OptionalArgCount;
                 command = foundHCLICommand;
+                //Runtime.ContractsForModules.ConsoleViewContract.Debug($"Found HCLI command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetModuleSubCommand(rawCommand, out ICommand? foundModuleCommand) && foundModuleCommand != null)
             {
                 _reqArgsRemain = foundModuleCommand.RequiredArgCount;
                 _optArgsRemain = foundModuleCommand.OptionalArgCount;
                 command = foundModuleCommand;
+                //Runtime.ContractsForModules.ConsoleViewContract.Debug($"Found sub command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetBaseCommand(rawCommand, out ICommand? found) && found != null)
             {
                 _reqArgsRemain = found.RequiredArgCount;
                 _optArgsRemain = found.OptionalArgCount;
                 command = found;
+                //Runtime.ContractsForModules.ConsoleViewContract.Debug($"Found base command. Command: {rawCommand}");
             }
             else
             {
-                ConsoleView.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
                 return null;
             }
 
@@ -77,7 +78,7 @@ namespace HCLI.Program.Core
                 {
                     if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag) || foundFlag == null)
                     {
-                        ConsoleView.PresentFeedback(new NotFound($"Flag was not found with the token \"{token}\"."));
+                        Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new NotFound($"Flag was not found with the token \"{token}\"."));
                         return null;
                     }
                 
@@ -113,7 +114,7 @@ namespace HCLI.Program.Core
                     }
                     else if (!flaggedWarning) 
                     {
-                        ConsoleView.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
+                        Runtime.ConsoleView.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
                     }
                 }
             }
@@ -122,14 +123,14 @@ namespace HCLI.Program.Core
 
             if (reqArgs.Count < returnReqArgs)
             {
-                ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
+                Runtime.ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
                 return null;
             }
             else
-                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
+                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
         }
 
-        public static UserInput? ParseForModules(string? rawInput, ModuleBase sender)
+        public UserInput? Parse(string? rawInput, ModuleBase sender)
         {
             if (string.IsNullOrEmpty(rawInput))
                 return null;
@@ -141,7 +142,12 @@ namespace HCLI.Program.Core
                 return null;
             }
 
+
             string rawCommand = tokens[0];
+
+            tokens.ForEach(x => Console.WriteLine(x));
+
+            Console.WriteLine();
 
             ICommand command;
             List<string> reqArgs = new List<string>();
@@ -154,7 +160,7 @@ namespace HCLI.Program.Core
             int _optArgsRemain = 0;
 
             
-
+            // Nem kellene a BaseCommandokat prioretizálni?
             if (Runtime.ModuleRegistry.TryGetModuleSubCommand(rawCommand, out ICommand? foundModuleCommand) && foundModuleCommand != null)
             {
                 _reqArgsRemain = foundModuleCommand.RequiredArgCount;
@@ -169,7 +175,7 @@ namespace HCLI.Program.Core
             }
             else
             {
-                ConsoleView.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
+                Runtime.ConsoleView.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
                 return null;
             }
 
@@ -189,7 +195,7 @@ namespace HCLI.Program.Core
                 {
                     if (!_flagRegistry.TryGet(token, out FlagDefinition? foundFlag) || foundFlag == null)
                     {
-                        ConsoleView.PresentFeedback(new NotFound($"Flag was not found with the token \"{token}\"."));
+                        Runtime.ConsoleView.PresentFeedback(new NotFound($"Flag was not found with the token \"{token}\"."));
                         return null;
                     }
 
@@ -225,7 +231,7 @@ namespace HCLI.Program.Core
                     }
                     else if (!flaggedWarning)
                     {
-                        ConsoleView.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
+                        Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
                     }
                 }
             }
@@ -234,7 +240,7 @@ namespace HCLI.Program.Core
 
             if (reqArgs.Count < returnReqArgs)
             {
-                ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
+                Runtime.ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
                 return null;
             }
             else
@@ -244,9 +250,9 @@ namespace HCLI.Program.Core
         // -- private -- //
 
 
-        private static bool IsTokenFlag(string token) => token.StartsWith("--");
+        private bool IsTokenFlag(string token) => token.StartsWith("--");
 
-        private static List<string> GetFlagValues(List<string> tokens, ref int i, FlagDefinition flagDef)
+        private  List<string> GetFlagValues(List<string> tokens, ref int i, FlagDefinition flagDef)
         {
             if (i + flagDef.RequiredValueCount >= tokens.Count)
                 throw new System.ArgumentException($"A(z) '{flagDef.Syntax}' flag-hez {flagDef.RequiredValueCount} db érték szükséges.");

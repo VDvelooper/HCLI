@@ -2,9 +2,8 @@
 {
     internal class ConfigData
     {
-        public string UserName { get; set; }
-        public bool SetupComplete { get; set; }
-        public string MainDirectoryPath { get; set; }
-        public string ConfigAbsolutePath { get; set; }
+        internal string UserName { get; set; }
+        internal bool SetupComplete { get; set; }
+        internal List<string> ModuleToLoadAtStart { get; set; }
     }
 }

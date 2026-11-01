@@ -1,5 +1,5 @@
-﻿using HCLI.Program.Core.Abstractions;
-using HCLI.Program.ModuleCore.Shared;
+﻿using ModuleContracts.Abstractions;
+using ModuleContracts.Feedback;
 
 namespace HCLI.Program.Core.Commands
 {
