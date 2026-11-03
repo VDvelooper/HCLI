@@ -121,6 +121,9 @@ namespace HCLI.Program
 
             foreach (ModuleBase module in LoadedModules)
             {
+                if (module.SubCommands == null) 
+                    continue;
+
                 if (!module.SubCommands.Where(x => x.Syntax == command).Any()) 
                     continue;
 

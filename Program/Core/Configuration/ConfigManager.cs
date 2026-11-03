@@ -17,6 +17,10 @@ namespace HCLI.Program.Core.Configuration
         {
             ConfigData = new ConfigData();
 
+            ConfigData.UserName = "user";
+            ConfigData.SetupComplete = false;
+            ConfigData.ModuleToLoadAtStart = new List<string>();
+
             MainDirectoryPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\HCLI";
             ConfigAbsolutePath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\HCLI\config.json";
         }
