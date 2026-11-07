@@ -1,7 +1,6 @@
 ﻿using ModuleContracts.ServiceContracts;
 using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback.Error;
-using ModuleContracts.Feedback.Warning;
 
 namespace HCLI.Program.Core
 {
@@ -9,6 +8,7 @@ namespace HCLI.Program.Core
     {
         private static readonly Lexer _lexer = new Lexer();
         private static readonly FlagRegistry _flagRegistry = new FlagRegistry();
+        private static readonly SemanticValidator _semanticValidator = Runtime.SemanticValidator;
 
         internal UserInput? Parse(string? raw)
         {
@@ -23,7 +23,7 @@ namespace HCLI.Program.Core
 
             string rawCommand = tokens[0];
 
-            ICommand command;
+            ICommand command = null!;
             List<string> reqArgs = new List<string>();
             List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
@@ -40,33 +40,24 @@ namespace HCLI.Program.Core
                 _reqArgsRemain = foundHCLICommand.RequiredArgCount;
                 _optArgsRemain = foundHCLICommand.OptionalArgCount;
                 command = foundHCLICommand;
-                //Runtime.ContractsForModules.ConsoleViewContract.Debug($"Found HCLI command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetModuleSubCommand(rawCommand, out ICommand? foundModuleCommand) && foundModuleCommand != null)
             {
                 _reqArgsRemain = foundModuleCommand.RequiredArgCount;
                 _optArgsRemain = foundModuleCommand.OptionalArgCount;
                 command = foundModuleCommand;
-                //Runtime.ContractsForModules.ConsoleViewContract.Debug($"Found sub command. Command: {rawCommand}");
             }
             else if (Runtime.ModuleRegistry.TryGetBaseCommand(rawCommand, out ICommand? found) && found != null)
             {
                 _reqArgsRemain = found.RequiredArgCount;
                 _optArgsRemain = found.OptionalArgCount;
                 command = found;
-                //Runtime.ContractsForModules.ConsoleViewContract.Debug($"Found base command. Command: {rawCommand}");
-            }
-            else
-            {
-                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
-                return null;
             }
 
 
 
             int returnReqArgs = _reqArgsRemain;
             int returnOptArgs = _optArgsRemain;
-            bool flaggedWarning = false;
 
 
 
@@ -112,30 +103,23 @@ namespace HCLI.Program.Core
                         _optArgsRemain--;
                         continue;
                     }
-                    else if (!flaggedWarning) 
-                    {
-                        Runtime.ConsoleView.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
-                    }
                 }
             }
 
+            UserInput userInput = new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
 
-
-            if (reqArgs.Count < returnReqArgs)
-            {
-                Runtime.ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
+            if (_semanticValidator.Validate(userInput))
+                return userInput;
+            else 
                 return null;
-            }
-            else
-                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
         }
 
-        public UserInput? Parse(string? rawInput, ModuleBase sender)
+        public UserInput? Parse(string? raw, ModuleBase sender)
         {
-            if (string.IsNullOrEmpty(rawInput))
+            if (string.IsNullOrEmpty(raw))
                 return null;
 
-            List<string> tokens = _lexer.Tokenize(rawInput);
+            List<string> tokens = _lexer.Tokenize(raw);
 
             if (tokens.Count == 0)
             {
@@ -149,7 +133,7 @@ namespace HCLI.Program.Core
 
             Console.WriteLine();
 
-            ICommand command;
+            ICommand command = null!;
             List<string> reqArgs = new List<string>();
             List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
@@ -173,17 +157,11 @@ namespace HCLI.Program.Core
                 _optArgsRemain = found.OptionalArgCount;
                 command = found;
             }
-            else
-            {
-                Runtime.ConsoleView.PresentFeedback(new UnknownCommand($"The command {rawCommand} is uknown."));
-                return null;
-            }
 
 
 
             int returnReqArgs = _reqArgsRemain;
             int returnOptArgs = _optArgsRemain;
-            bool flaggedWarning = false;
 
 
 
@@ -229,22 +207,17 @@ namespace HCLI.Program.Core
                         _optArgsRemain--;
                         continue;
                     }
-                    else if (!flaggedWarning)
-                    {
-                        Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new UnusedOptionalArgument("CommandParser.cs"));
-                    }
                 }
             }
 
 
 
-            if (reqArgs.Count < returnReqArgs)
-            {
-                Runtime.ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
-                return null;
-            }
+            UserInput userInput = new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
+
+            if (_semanticValidator.Validate(userInput))
+                return userInput;
             else
-                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
+                return null;
         }
 
         // -- private -- //

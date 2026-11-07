@@ -42,9 +42,6 @@ namespace HCLI.Program
             {
                 try
                 {
-                    Console.Write($"possibleAbsDllPath=");
-                    Console.WriteLine(possibleAbsDllPath);
-
                     AssemblyLoadContext mdlCtxt = new AssemblyLoadContext(possibleAbsDllPath, true); // moduleContext
 
                     Type[] moduleDllTypes = mdlCtxt.LoadFromAssemblyPath(possibleAbsDllPath).GetTypes();
@@ -84,36 +81,44 @@ namespace HCLI.Program
             }
         }
 
+        /// <summary>
+        /// Instanciates the type of the module. Does not add to the LoadedModules list!
+        /// </summary>
         internal ModuleBase? InstanciateModule(Type foundModuleType)
         {
-            ModuleBase? moduleObject = Activator.CreateInstance(foundModuleType, Runtime.ContractsForModules, DetectedModules[foundModuleType]) as ModuleBase;
+            ModuleBase? moduleInstance = Activator.CreateInstance(foundModuleType, Runtime.ContractsForModules, DetectedModules[foundModuleType]) as ModuleBase;
 
-            if (moduleObject == null)
+            if (moduleInstance == null)
             {
                 Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new ValueWasNull(null, null, false));
                 Runtime.ContractsForModules.ConsoleViewContract.Error($"The instanciation of module {foundModuleType.FullName} is not possible, because it is already loaded.");
                 return null;
             }
 
-            if (LoadedModules.Contains(moduleObject))
+            if (LoadedModules.Contains(moduleInstance))
             {
                 Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new AlreadyExists(null, null, false));
                 Runtime.ContractsForModules.ConsoleViewContract.Warn($"The instanciation of module {foundModuleType.FullName} is not possible, because it is already loaded.");
                 return null;
             }
             
-            if (moduleObject == null)
+            if (moduleInstance == null)
             {
                 Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new NotFound(null, null, false));
                 Runtime.ContractsForModules.ConsoleViewContract.FatalError($"The instanciation of module {foundModuleType.FullName} have returned null. (NotFound feedback.)");
                 return null;
             }
 
-            LoadedModules.Add(moduleObject);
+            if (!moduleInstance.ModuleConfigLoaded)
+                return null;
 
-            return moduleObject;
+            return moduleInstance;
         }
 
+        internal void AddModuleToLoadedList(ModuleBase moduleInstance)
+        {
+            LoadedModules.Add(moduleInstance);
+        }
 
         internal bool TryGetModuleSubCommand(string command, out ICommand? found)
         {

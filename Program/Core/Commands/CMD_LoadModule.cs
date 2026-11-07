@@ -1,6 +1,8 @@
 ﻿using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback;
 using ModuleContracts.Feedback.Error;
+using ModuleContracts.Feedback.Warning;
+using System.Linq;
 
 namespace HCLI.Program.Core.Commands
 {
@@ -32,16 +34,19 @@ namespace HCLI.Program.Core.Commands
                 ModuleBase? created = mr.InstanciateModule(types[0]);
 
                 if (created == null)
-                {
                     return new ValueWasNull($"Returned instance of the specified module was null.", null, true);
-                }
 
-                Runtime.ContractsForModules.ConsoleViewContract.Message($"The module is now avalible with the command, \"{created.ModuleCommand}\"");
+                if (mr.LoadedModules.Where(obj => obj.ModuleCommand == created.ModuleCommand).Any())
+                    return new AlreadyExists($"The module '{created.ModuleName}' is already loaded with the command of '{created.ModuleCommand}'.");
+
+                mr.AddModuleToLoadedList(created);
+
+                Runtime.ContractsForModules.ConsoleViewContract.Message($"The module is now avalible with the command, '{created.ModuleCommand}'");
                 return null;
             }
             else
             {
-                return new NotFound($"No module found with the name of \"{userInput.RequiredArgs[0]}\"", null, true);
+                return new NotFound($"No module found with the name of '{userInput.RequiredArgs[0]}'", null, true);
             }
         }
     }
