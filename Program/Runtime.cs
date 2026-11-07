@@ -53,7 +53,6 @@ namespace HCLI.Program
         private static void InstanciateCore()
         {
             CommandParser = new CommandParser();
-            SemanticValidator = new SemanticValidator();
             CommandExecuter = new CommandExecuter();
             CommandRegistry = new CommandRegistry();
             ConfigManager = new ConfigManager();
@@ -85,7 +84,6 @@ namespace HCLI.Program
 
 
         internal static CommandParser CommandParser { get; private set; } = new CommandParser();
-        internal static SemanticValidator SemanticValidator { get; private set; } = new SemanticValidator();
         internal static CommandExecuter CommandExecuter { get; private set; } = new CommandExecuter();
         internal static CommandRegistry CommandRegistry { get; private set; } = new CommandRegistry();
 
