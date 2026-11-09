@@ -1,7 +1,7 @@
 ﻿using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback;
 
-namespace HCLI.Program.Core.Commands
+namespace HCLI.Program.Commands
 {
     internal class CMD_Echo : ICommand
     {

@@ -2,7 +2,7 @@
 using ModuleContracts.Feedback;
 using ModuleContracts.Feedback.Error;
 
-namespace HCLI.Program.Core.Commands
+namespace HCLI.Program.Commands
 {
     internal class CMD_LoadModule : ICommand
     {

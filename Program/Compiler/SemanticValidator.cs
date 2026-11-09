@@ -3,7 +3,7 @@ using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback.Error;
 using ModuleContracts.Feedback.Warning;
 
-namespace HCLI.Program.Core
+namespace HCLI.Program.Compiler
 {
     internal class SemanticValidator
     {

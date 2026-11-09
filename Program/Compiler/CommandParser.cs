@@ -3,7 +3,7 @@ using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback.Error;
 using ModuleContracts.Feedback.Warning;
 
-namespace HCLI.Program.Core
+namespace HCLI.Program.Compiler
 {
     public class CommandParser : ICommandParserContract
     {
@@ -20,6 +20,11 @@ namespace HCLI.Program.Core
             if (tokens.Count == 0) {
                 return null;
             }
+
+
+
+
+
 
             string rawCommand = tokens[0];
 
@@ -119,23 +124,29 @@ namespace HCLI.Program.Core
                 }
             }
 
+            UserInput? userInput = new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
 
-
-            if (reqArgs.Count < returnReqArgs)
+            if (userInput == null)
             {
-                Runtime.ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new InternalNullExeption("Generated UserInput was null."));
+                return null;
+            }
+
+            if (!Runtime.SemanticValidator.Validate(userInput))
+            {
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new UnknownCommand("The given command couldn't be validated semanticly."));
                 return null;
             }
             else
-                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
+                return userInput;
         }
 
-        public UserInput? Parse(string? rawInput, ModuleBase sender)
+        public UserInput? Parse(string? raw, ModuleBase sender)
         {
-            if (string.IsNullOrEmpty(rawInput))
+            if (string.IsNullOrEmpty(raw))
                 return null;
 
-            List<string> tokens = _lexer.Tokenize(rawInput);
+            List<string> tokens = _lexer.Tokenize(raw);
 
             if (tokens.Count == 0)
             {
@@ -145,11 +156,8 @@ namespace HCLI.Program.Core
 
             string rawCommand = tokens[0];
 
-            tokens.ForEach(x => Console.WriteLine(x));
 
-            Console.WriteLine();
-
-            ICommand command;
+            ICommand command = null!;
             List<string> reqArgs = new List<string>();
             List<string> optArgs = new List<string>();
             List<ParsedFlag> flags = new List<ParsedFlag>();
@@ -160,6 +168,7 @@ namespace HCLI.Program.Core
             int _optArgsRemain = 0;
 
             
+
             // Nem kellene a BaseCommandokat prioretizálni?
             if (Runtime.ModuleRegistry.TryGetModuleSubCommand(rawCommand, out ICommand? foundModuleCommand) && foundModuleCommand != null)
             {
@@ -236,15 +245,21 @@ namespace HCLI.Program.Core
                 }
             }
 
+            UserInput? userInput = new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, raw);
 
-
-            if (reqArgs.Count < returnReqArgs)
+            if (userInput == null)
             {
-                Runtime.ConsoleView.PresentFeedback(new MissingRequiredArgument($"Not enough arguments were provided. {returnReqArgs - reqArgs.Count} required argument(s) is missing."));
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new InternalNullExeption("Generated UserInput was null."));
+                return null;
+            }
+
+            if (!Runtime.SemanticValidator.Validate(userInput))
+            {
+                Runtime.ContractsForModules.ConsoleViewContract.PresentFeedback(new UnknownCommand("The given command couldn't be validated semanticly."));
                 return null;
             }
             else
-                return new UserInput(command, reqArgs, returnReqArgs, optArgs, returnOptArgs, flags, rawInput);
+                return userInput;
         }
 
         // -- private -- //
@@ -255,7 +270,7 @@ namespace HCLI.Program.Core
         private  List<string> GetFlagValues(List<string> tokens, ref int i, FlagDefinition flagDef)
         {
             if (i + flagDef.RequiredValueCount >= tokens.Count)
-                throw new System.ArgumentException($"A(z) '{flagDef.Syntax}' flag-hez {flagDef.RequiredValueCount} db érték szükséges.");
+                throw new ArgumentException($"A(z) '{flagDef.Syntax}' flag-hez {flagDef.RequiredValueCount} db érték szükséges.");
 
             List<string> foundValues = new List<string>();
 

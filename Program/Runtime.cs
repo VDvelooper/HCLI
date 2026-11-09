@@ -1,11 +1,11 @@
-﻿using System.Diagnostics;
-
-using HCLI.Program.Core;
+﻿using HCLI.Program.Compiler;
 using HCLI.Program.Core.Configuration;
 using HCLI.Program.Core.ConsoleComm;
+using HCLI.Program.Operations;
 using ModuleContracts;
 using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback.Error;
+using System.Diagnostics;
 
 namespace HCLI.Program
 {
@@ -52,19 +52,26 @@ namespace HCLI.Program
 
         private static void InstanciateCore()
         {
-            CommandParser = new CommandParser();
-            CommandExecuter = new CommandExecuter();
-            CommandRegistry = new CommandRegistry();
             ConfigManager = new ConfigManager();
-            ModuleRegistry = new ModuleRegistry();
             ConsoleView = new ConsoleView();
+
+            CommandParser = new CommandParser();
+            SemanticValidator = new SemanticValidator();
+            CommandExecuter = new CommandExecuter();
+
+            CommandRegistry = new CommandRegistry();
+            OperationsRegistry = new OperationsRegistry();
+            ModuleRegistry = new ModuleRegistry();
+
+
+
 
             ContractsForModules = new Contracts(ConsoleView, CommandExecuter, ConfigManager, CommandParser);
         }
 
         internal static void ValidateExitCommand(object sender) // weak ass validation. => bárki megadhat bármilyen object-et amihez hozzáfér
         {
-            if (sender is not Program.Core.Commands.CMD_Exit)
+            if (sender is not Commands.CMD_Exit)
             {
                 var ex = new InternalValidationExeption("Exit command's sender was not Program.Core.Commands.CMD_Exit.", null, true);
                 ConsoleView.PresentFeedback(ex);
@@ -83,13 +90,15 @@ namespace HCLI.Program
         internal static ConsoleView ConsoleView { get; private set; } = new ConsoleView();
 
 
-        internal static CommandParser CommandParser { get; private set; } = new CommandParser();
-        internal static CommandExecuter CommandExecuter { get; private set; } = new CommandExecuter();
-        internal static CommandRegistry CommandRegistry { get; private set; } = new CommandRegistry();
+        internal static CommandParser CommandParser { get; private set; }
+        internal static SemanticValidator SemanticValidator { get; private set; }
+        internal static CommandExecuter CommandExecuter { get; private set; }
 
 
-        internal static ConfigManager ConfigManager { get; private set; } = new ConfigManager();
-        internal static ModuleRegistry ModuleRegistry { get; private set; } = null!;
+        internal static CommandRegistry CommandRegistry { get; private set; }
+        internal static OperationsRegistry OperationsRegistry { get; private set; }
+        internal static ModuleRegistry ModuleRegistry { get; private set; }
+        internal static ConfigManager ConfigManager { get; private set; } 
 
 
         internal static Contracts ContractsForModules { get; private set; } = null!;

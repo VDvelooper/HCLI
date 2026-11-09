@@ -2,7 +2,7 @@
 using ModuleContracts.Feedback;
 using ModuleContracts.Feedback.Error;
 
-namespace HCLI.Program.Core.Commands
+namespace HCLI.Program.Commands
 {
     internal class CMD_Exit : ICommand
     {
@@ -14,7 +14,7 @@ namespace HCLI.Program.Core.Commands
 
         public CMD_Exit(string syntax, int requiredArgCount, int optionalArgCount, string description, object senderForVerification, ModuleBase? parentModule = null)
         {
-            if (senderForVerification is not Program.CommandRegistry)
+            if (senderForVerification is not CommandRegistry)
             {
                 var ex = new InternalValidationExeption("Program.Core.Commands.CMD_Exit class was unauthorized to be instanciated.", null, true);
                 Runtime.ConsoleView.PresentFeedback(ex);

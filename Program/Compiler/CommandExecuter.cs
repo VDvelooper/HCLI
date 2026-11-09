@@ -2,7 +2,7 @@
 using ModuleContracts.Feedback;
 using ModuleContracts.ServiceContracts;
 
-namespace HCLI.Program.Core
+namespace HCLI.Program.Compiler
 {
     public class CommandExecuter : ICommandExecuterContract
     {
