@@ -4,5 +4,6 @@
     {
         string OperationSymbol { get; }
         int OperandCount { get; }
+        bool OperandBeforeSymbol { get; }
     }
 }

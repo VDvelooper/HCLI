@@ -2,6 +2,7 @@
 using ModuleContracts.Abstractions;
 using ModuleContracts.Feedback.Error;
 using ModuleContracts.Feedback.Warning;
+using HCLI.Program.Core.Abstractions;
 
 namespace HCLI.Program.Compiler
 {
@@ -22,8 +23,55 @@ namespace HCLI.Program.Compiler
             }
 
 
+            // unary/binary/(trinary) operations check
 
 
+            for (int i = 0; i < tokens.Count; i++)
+            {
+
+                string token = tokens[i];
+
+                if (!Runtime.OperationsRegistry.TryGetOperation(token, out IOperation? foundOp) || foundOp == null)
+                    continue;
+
+                int oprCount = foundOp.OperandCount;
+
+                switch (foundOp.OperandCount)
+                {
+                    case 1:
+
+                        if (foundOp.OperandBeforeSymbol)
+                        {
+                            string operandRaw = tokens[i - 1];
+
+                            
+
+                        }
+
+                        break;
+
+                    case 2:
+
+                        // binary op
+
+                        break;
+
+                    case 3:
+
+                        // trinary op
+
+                        break;
+
+                    default:
+                        Runtime.ConsoleView.PresentFeedback(new NotFound("The found operation's OperandCount is not acceptable."));
+                        break;
+                }
+
+
+            }
+
+
+            // argument operation check 
 
 
             string rawCommand = tokens[0];
@@ -261,6 +309,24 @@ namespace HCLI.Program.Compiler
             else
                 return userInput;
         }
+
+        /*public bool TryParseGeneric<T>(string input, out T result) where T : struct
+        {
+            var type = typeof(T);
+            var method = type.GetMethod("TryParse", new[] { typeof(string), type.MakeByRefType() });
+
+            if (method == null)
+            {
+                result = default(T);
+                return false;
+            }
+
+            var parameters = new object[] { input, null! };
+            bool success = (bool)method.Invoke(null, parameters);
+            result = (T)parameters[1];
+            return success;
+        }*/
+
 
         // -- private -- //
 

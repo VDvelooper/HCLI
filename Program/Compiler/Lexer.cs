@@ -5,7 +5,7 @@ namespace HCLI.Program.Compiler
 {
     internal class Lexer
     {
-        public List<string> Tokenize(string rawInput) // zzz
+        public List<string> Tokenize(string rawInput)
         {
             List<string> tokens = new List<string>();
 
