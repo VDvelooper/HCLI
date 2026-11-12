@@ -34,7 +34,7 @@ namespace HCLI.Program.Compiler
                 if (!Runtime.OperationsRegistry.TryGetOperation(token, out IOperation? foundOp) || foundOp == null)
                     continue;
 
-                int oprCount = foundOp.OperandCount;
+                int oprCount = foundOp.Exe;
 
                 switch (foundOp.OperandCount)
                 {

@@ -8,12 +8,13 @@ namespace HCLI.Program.Operations.Types
         public string OperationSymbol { get; private set; }
         public int OperandCount { get; private set; }
         public bool OperandBeforeSymbol { get; private set; }
-
+        public Action<double> ExecuteMethod { get; private set; }
         public Incrementation()
         {
             OperationSymbol = "++";
             OperandCount = 1;
             OperandBeforeSymbol = true;
+            ExecuteMethod = Execute;
         }
 
         public double Execute(double[] input)
