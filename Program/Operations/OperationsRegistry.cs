@@ -23,6 +23,7 @@ namespace HCLI.Program.Operations
         }
 
 
+
         public bool TryGetOperation(string operation, out Core.Abstractions.IOperation? foundOp)
         {
             if (UnaryOps.ContainsKey(operation))
